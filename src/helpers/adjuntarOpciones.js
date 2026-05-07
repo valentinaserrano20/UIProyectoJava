@@ -8,10 +8,10 @@ import * as api from "./api";
 export const adjuntar = async (combox, endpoint) => {
   const datos = await api.get(endpoint);
   datos.forEach((dat) => {
-    if (dat.is_active == 1) {
+    if (dat.activo == 1) {
       const option = document.createElement("option");
       option.value = dat.id; // ID oculto de sistema
-      option.textContent = `${dat.name}`; // Label visual legible del usuario
+      option.textContent = `${dat.nombre}`; // Label visual legible del usuario
       combox.appendChild(option);
     }
   });
@@ -23,7 +23,7 @@ export const adjuntarNoValida = async (combox, endpoint) => {
   datos.forEach((dat) => {
     const option = document.createElement("option");
     option.value = dat.id;
-    option.textContent = `${dat.name}`;
+    option.textContent = `${dat.nombre}`;
     combox.appendChild(option);
   });
 };
@@ -32,11 +32,11 @@ export const adjuntarNoValida = async (combox, endpoint) => {
 export const adjuntarInfo = async (combox, endpoint, infoDato) => {
   const datos = await api.get(endpoint);
   datos.forEach((dat) => {
-    if (dat.is_active == 1) {
+    if (dat.activo == 1) {
       const option = document.createElement("option");
       option.value = dat.id;
-      // infoDato mapeará dinamicamente otro campo sumado al .name
-      option.textContent = `${dat[infoDato]} - ${dat.name}`;
+      // infoDato mapeará dinamicamente otro campo sumado al .nombre
+      option.textContent = `${dat[infoDato]} - ${dat.nombre}`;
       combox.appendChild(option);
     }
   });
@@ -46,10 +46,10 @@ export const adjuntarInfo = async (combox, endpoint, infoDato) => {
 export const adjuntarDouble = async (combox, endpoint,input,infoDato) => {
   const datos = await api.get(endpoint);
   datos.forEach((dat) => {
-    if (dat.is_active == 1) {
+    if (dat.activo  == 1) {
       const option = document.createElement("option");
       option.value = dat.id;
-      option.textContent = `${dat.name}`;
+      option.textContent = `${dat.nombre}`;
       combox.appendChild(option);
     }
   });
@@ -100,10 +100,10 @@ export const adjuntarReseteo = async (combox, endpoint) => {
 
   // Inyecta una por una según formato de objeto requerido por TomSelect
   datos.forEach((dat) => {
-    if (dat.is_active == 1) {
+    if (dat.activo == 1) {
       tom.addOption({
         value: dat.id,
-        text: dat.name
+        text: dat.nombre
       });
     }
   });
@@ -131,7 +131,7 @@ export const adjuntarReseteoNoValida = async (combox, endpoint) => {
     datos.forEach((dat) => {
       tom.addOption({
         value: dat.id,
-        text: dat.name
+        text: dat.nombre
       });
     });
 
@@ -146,7 +146,7 @@ export const adjuntarReseteoNoValida = async (combox, endpoint) => {
     datos.forEach((dat) => {
       const option = document.createElement("option");
       option.value = dat.id;
-      option.textContent = dat.name;
+      option.textContent = dat.nombre;
       combox.appendChild(option);
     });
   }

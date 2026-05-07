@@ -30,19 +30,20 @@ export default async () => {
   const genero = document.getElementById("generos");
   const nacimiento = document.getElementById("nacimiento");
   const telefono = document.getElementById("telefono");
-  const seccional = document.getElementById("seccionales");
   const organizacion = document.getElementById("organizaciones");
   const corrElectronico = document.getElementById("correoElectronico");
   const contrasena = document.getElementById("contrasena");
   const confContrasena = document.getElementById("confirmarContrasena");
 
+
+
   // Inyección DOM: Solicita y llena los combos <select> vacíos usando el Helper general `adjuntarOpciones.js`
   // Nota: Al cargarse piden de Endpoints 'Public' que no necesitan ser un User Valido LocalStorage
-  await adjuntarOpc.adjuntarInfo(tipoDocumento,"public/document-types","acronym");
-  await adjuntarOpc.adjuntar(genero, "public/genders");
-  await adjuntarOpc.adjuntar(seccional, "public/sectionals");
+  await adjuntarOpc.adjuntarInfo(tipoDocumento, "public/tipos-documento", "sigla");
+  await adjuntarOpc.adjuntar(genero, "public/generos");
+  await adjuntarOpc.adjuntar(organizacion, "public/organizaciones");
   fechas.initFechas();
-  
+
   // Libre pase visual
   boton.disabled = false;
 
@@ -56,70 +57,64 @@ export default async () => {
   form.addEventListener("submit", async (e) => {
     // Flag ON
     window.procesoPeticion = true;
-    
+
     // Congela evento default
     e.preventDefault();
-    
+
     // Solicita confirmación verbal visual antes de mandar POST puro (Previniendo miss-clicks severos)
     const confirmacion = await alerta.alertaQuest("¿Seguro que quieres crear la cuenta?");
     if (!confirmacion.isConfirmed) return; // Si dice cancelar/afuera asume early return
 
     // Validandos booleanos 
     const booleanValidacion = validacion.validadorAutomatico.validarTodo(form);
-    
+
     // Lógica especial que chequea los dos nodos de Password y que visualmente empate valor (Contraseñas idénticas)
     const validacionContrasena = validacion.validar_igualdad(contrasena, confContrasena);
-    
+
     // Si algún proceso falló (Regex o Identidad)
-    if (!booleanValidacion || !validacionContrasena)
-    {
+    if (!booleanValidacion || !validacionContrasena) {
       window.procesoPeticion = false // Abre exclusa de bugs
       boton.disabled = false; // Suelta boton
       return // Corta
     }
-    
-      // Objeto JS armado meticulosamente referenciando los Models esperados Backend para Users
-      const datosRegistro = {
-        names: nombres.value,
-        last_names: apellidos.value,
-        birth_date: nacimiento.value,  // ISO yyyy-mm-dd
-        document_type_id: tipoDocumento.value,
-        document_number: numDocumento.value,
-        phone: telefono.value,
-        gender_id: genero.value,
-        organization_id: organizacion.value,
-        email: corrElectronico.value,
-        password: contrasena.value,
-      };
-      
-      // Llamada Network 
-      try {
-        // Enlaza la ruta 'api/v1/register/' (Por omisión app)
-        const data = await api.post("register", datosRegistro);
-        
-        // Verifica prop return success estándar en todo Service response de backend
-        if (data.success) {
-          await alerta.alertaOK(data.message);
-          window.location.href = "#/login"; // Vuelve a la puerta Login esperando Confirmación Manual interna posterior
-        } else alerta.alertaWarning(data.message, data.errors); // Producir array validation
-      } catch (error) {
-        alerta.alertaError(error); // Trágico 500 error o no red
-      }
-    
+
+    // Objeto JS armado meticulosamente referenciando los Models esperados Backend para Users
+    const datosRegistro = {
+      names: nombres.value,
+      last_names: apellidos.value,
+      birth_date: nacimiento.value,  // ISO yyyy-mm-dd
+      document_type_id: tipoDocumento.value,
+      document_number: numDocumento.value,
+      phone: telefono.value,
+      gender_id: genero.value,
+      organization_id: organizacion.value,
+      email: corrElectronico.value,
+      password: contrasena.value,
+    };
+
+    // Llamada Network 
+    try {
+      // Enlaza la ruta 'api/v1/register/' (Por omisión app)
+      const data = await api.post("register", datosRegistro);
+
+      // Verifica prop return success estándar en todo Service response de backend
+      if (data.success) {
+        await alerta.alertaOK(data.message);
+        window.location.href = "#/login"; // Vuelve a la puerta Login esperando Confirmación Manual interna posterior
+      } else alerta.alertaWarning(data.message, data.errors); // Producir array validation
+    } catch (error) {
+      alerta.alertaError(error); // Trágico 500 error o no red
+    }
+
     // Vuelta al ruedo si no redirigio
     boton.disabled = false;
     window.procesoPeticion = false;
   });
 
-  // Listener importante DropDown "Dependiente": Cuando cambia Seccional debe re-pedir Organizaciones de esa rama
-  seccional.addEventListener("change", async () => {
-    // Usa helper de "Reseteo" para limpiar el innerHTML viejo y repoblar mediante query public paramétrico url  
-    await adjuntarOpc.adjuntarReseteo(organizacion, `public/organizations/sectional/${seccional.value}`);
-  });
-  
   // Delegador de clic secundario de ventana SPA (Botón o hipervínculo para volver si ya tengo cuenta real)
   window.addEventListener("click", async (e) => {
     if (e.target.matches("#tengoCuenta") && !window.procesoPeticion)
       window.location.href = "#/login";
   });
 };
+
