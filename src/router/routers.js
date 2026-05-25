@@ -39,9 +39,28 @@ import * as usuario from "../views/usuario/index.js"
 
 // Configuraciones predefinidas de permisos para cada ruta
 const publicRoute = { private: false, permissions: [] };
-const voluntarioRoute = { private: true, permissions: ['voluntario'] };
-const supervisorRoute = { private: true, permissions: ['supervisor'] };
-const adminRoute = { private: true, permissions: ['admin'] };
+
+// =========================================================
+// CRÍTICO FIX #3 — Claves de permisos desincronizadas
+// =========================================================
+// PROBLEMA: Las claves cortas ('voluntario', 'supervisor', 'admin') nunca coincidían
+// con los valores que LoginServlet guarda en localStorage bajo el campo 'permissions'.
+//
+// El backend (LoginServlet.java) escribe exactamente:
+//   Rol 1 → "home-frontend.voluntario"
+//   Rol 2 → "home-frontend.supervisor,home-frontend.administrador"
+//
+// La función isAuthorize() en auth.js compara con split(',') y busca coincidencia exacta.
+// Con las claves anteriores ('voluntario' vs 'home-frontend.voluntario') → nunca coincidían
+// → tienePermisos() devolvía false para todos los usuarios autenticados
+// → ningún usuario podía acceder a ninguna ruta privada tras el login.
+//
+// SOLUCIÓN: Alinear las claves con los strings exactos que produce el backend.
+const voluntarioRoute = { private: true, permissions: ['home-frontend.voluntario'] };
+const supervisorRoute = { private: true, permissions: ['home-frontend.supervisor'] };
+// Rol 2 tiene acceso tanto a /supervisor como a /administrador según LoginServlet
+const adminRoute      = { private: true, permissions: ['home-frontend.administrador'] };
+// =========================================================
 
 
 export const routes = {

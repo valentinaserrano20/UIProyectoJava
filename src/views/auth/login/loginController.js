@@ -69,13 +69,14 @@ export default async () => {
       // Presenta mensaje de bienvenida / Éxito dictado por Api
       await alerta.alertaOK(data.message);
       
-      // Enrutador cliente "Router" manual leyendo permisos o rol ID local
-      if (atributos.role_id == 1) window.location.href = "#/administrador"; // Dashboard Administrador Supremo
-      else if (atributos.role_id == 2)
-        window.location.href = "#/supervisor"; // Dashboard Supervisor (Tercero)
-      else if (atributos.role_id == 3)
-        window.location.href = "#/voluntario"; // Dashboard Voluntario 
-      else window.location.href = "#/login"; // Contingencia en caso raro
+      // MODIFICADO: Redirección post-login según la alineación de roles (Rol 1 = Voluntario, Rol 2 = Supervisor_Admin)
+      if (atributos.role_id == 1) {
+        window.location.href = "#/voluntario";
+      } else if (atributos.role_id == 2) {
+        window.location.href = "#/supervisor";
+      } else {
+        window.location.href = "#/login";
+      }
     
     } else {
       // Branch fallido (Ej: Credenciales incorrectas)
@@ -87,16 +88,23 @@ export default async () => {
     window.procesoPeticion = false;
   });
 
-  // Listener global delegado al scope Window para interacciones sobre links secundarios
-  window.addEventListener("click", async (e) => {
-    // Evento ir al registro (Boton inferior o hipervinculo)
-    if (e.target.matches("#crearCuenta") && !window.procesoPeticion)
-      window.location.href = "#/register";
-  });
-  
-  window.addEventListener("click", async (e) => {
-    // Evento ir al Olvide pass (Link en medio de la pantalla modal)
-    if (e.target.matches("#recuperarContrasena") && !window.procesoPeticion)
-      window.location.href = "#/forgotPassword";
-  });
+  // MODIFICADO: Listeners enlazados directamente a los elementos del DOM local para prevenir fugas de memoria en window
+  const crearCuentaBtn = document.getElementById("crearCuenta");
+  const recuperarContrasenaBtn = document.getElementById("recuperarContrasena");
+
+  if (crearCuentaBtn) {
+    crearCuentaBtn.addEventListener("click", () => {
+      if (!window.procesoPeticion) {
+        window.location.href = "#/register";
+      }
+    });
+  }
+
+  if (recuperarContrasenaBtn) {
+    recuperarContrasenaBtn.addEventListener("click", () => {
+      if (!window.procesoPeticion) {
+        window.location.href = "#/forgotPassword";
+      }
+    });
+  }
 };

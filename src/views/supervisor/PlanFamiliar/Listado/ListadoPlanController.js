@@ -6,33 +6,33 @@
 import * as alerta from "../../../../helpers/alertas";
 import * as api from "../../../../helpers/api";
 import paginacion from "../../../../helpers/paginacion";
-import {dropdownFiltro} from "../../../../componentes/filter/dropdown"
-import {searchBar} from "../../../../componentes/filter/searchBar"
+import { dropdownFiltro } from "../../../../componentes/filter/dropdown"
+import { searchBar } from "../../../../componentes/filter/searchBar"
 import { ver } from "../../../../helpers/modales/integrante";
 import { color } from "chart.js/helpers";
 
 const ListadoPlanController = async () => {
 
     const statusPlans = await api.get(`statusPlans/`);
-    
+
     const botonBack = document.getElementById("botonBack");
 
     const contenedor = document.querySelector(".container__paginas");
-    
+
     const selectStatusCont = document.createElement("div");
     selectStatusCont.classList.add("selector--estado__cont");
 
 
     // encontrar contenedor donde van los filtros
     const contenedorFiltro = document.querySelector(".container__filtro");
-    
+
 
     botonBack.onclick = () => {
         if (window.procesoPeticion) return;
         location.href = `#/supervisor/`;
     };
 
-        
+
     // agregar campos de filtro
 
     const searchbar = await searchBar(searchBarFiltro)
@@ -41,7 +41,7 @@ const ListadoPlanController = async () => {
     contenedorFiltro.append(searchbar)
     contenedorFiltro.append(dropdown)
 
-    
+
     let filtroEstado = 0;
     let filtroBusqueda = "";
     let todosLosPlanes = [];
@@ -56,18 +56,18 @@ const ListadoPlanController = async () => {
     const renderPlanes = () => {
         contenedor.innerHTML = "";
 
-     const planesFiltrados = todosLosPlanes.filter(plan => {
-    const pasaEstado  = filtroEstado === 0 || plan.status_id == filtroEstado;
-    const pasaBusqueda = filtroBusqueda === "" ||
-      plan.last_names.toLowerCase().includes(filtroBusqueda.toLowerCase());
+        const planesFiltrados = todosLosPlanes.filter(plan => {
+            const pasaEstado = filtroEstado === 0 || plan.status_id == filtroEstado;
+            const pasaBusqueda = filtroBusqueda === "" ||
+                plan.last_names.toLowerCase().includes(filtroBusqueda.toLowerCase());
 
-    return pasaEstado && pasaBusqueda; // deben cumplirse los dos
-  });
+            return pasaEstado && pasaBusqueda; // deben cumplirse los dos
+        });
 
-      planesFiltrados.forEach(async(plan) => {
-    contenedor.append(await carta(plan));
-  });
-};
+        planesFiltrados.forEach(async (plan) => {
+            contenedor.append(await carta(plan));
+        });
+    };
 
 
     let estadoActivo = 0;
@@ -79,9 +79,9 @@ const ListadoPlanController = async () => {
     const carta = async (info) => {
 
         const div = document.createElement("div");
-        div.classList.add( "tarjeta");
+        div.classList.add("tarjeta");
         console.log(info);
-        
+
 
         //INTRODUCCION DE LA TARJETA _____________________________________________________________________________________
 
@@ -120,24 +120,24 @@ const ListadoPlanController = async () => {
         const voluntarioIcono = document.createElement("i");
         voluntarioIcono.classList.add("icono--pequeno", "ri-user-line");
         nombreVoluntario.append(voluntarioIcono, "Voluntario: ", info.responsable);
-        
+
 
         introduccionCont.append(apellidoFamilia, departamento, fechaRecibido, nombreVoluntario);
 
         introduccionDiv.append(imagenIcono, introduccionCont);
-        
+
         tarjetaIntroduccion.append(introduccionDiv);
 
         const estadoTipoCont = document.createElement("div");
         estadoTipoCont.classList.add("verPlan__tipo--estado");
 
-        const estadoClase = 
-        info.status_id == 3 ? "verPlan__estado--azul"
-        : info.status_id == 4 || info.status_id == 7
-        ? "verPlan__estado--verde"
-        : info.status_id == 5 || info.status_id == 6
-        ? "verPlan__estado--rojo"
-        : ""; // Vacio por default (Asume estado 1 o 2 'En Progreso')
+        const estadoClase =
+            info.status_id == 3 ? "verPlan__estado--azul"
+                : info.status_id == 4 || info.status_id == 7
+                    ? "verPlan__estado--verde"
+                    : info.status_id == 5 || info.status_id == 6
+                        ? "verPlan__estado--rojo"
+                        : ""; // Vacio por default (Asume estado 1 o 2 'En Progreso')
 
         const verEstado = document.createElement("p");
         verEstado.classList.add("verPlan__estado", estadoClase);
@@ -146,9 +146,9 @@ const ListadoPlanController = async () => {
 
         tarjetaIntroduccion.append(verEstado);
 
-        const tipoClase = info.family_type_id == 1 ? "verPlan__tipo--rojo" 
-        : info.family_type_id == 2 ? "verPlan__tipo--verde" 
-        : "verPlan__tipo--gris";
+        const tipoClase = info.family_type_id == 1 ? "verPlan__tipo--rojo"
+            : info.family_type_id == 2 ? "verPlan__tipo--verde"
+                : "verPlan__tipo--gris";
 
         const tipoFamilia = document.createElement("p");
         tipoFamilia.classList.add("verPlan__tipo", tipoClase);
@@ -164,7 +164,7 @@ const ListadoPlanController = async () => {
         const resvisarPlan = document.createElement("button");
         resvisarPlan.classList.add("boton", "boton--height");
         resvisarPlan.textContent = "Revisar Plan";
-        
+
         div.append(resvisarPlan);
 
 
@@ -210,10 +210,10 @@ const ListadoPlanController = async () => {
 
 
     dropdown.addEventListener("change", e => {
-        filtroEstado = Number(e.target.value); 
-        renderPlanes(); 
+        filtroEstado = Number(e.target.value);
+        renderPlanes();
     })
-    function searchBarFiltro (event) {
+    function searchBarFiltro(event) {
         filtroBusqueda = event.target.value.trim();
         renderPlanes();
     }

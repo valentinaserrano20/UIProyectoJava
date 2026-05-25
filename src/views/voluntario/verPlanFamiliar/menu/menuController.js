@@ -33,7 +33,9 @@ export default async () => {
   // Guardián Frontend: ¿El usuario que intenta entrar por URL es el dueño de este plan? ¿Tiene el estado correcto para modificarlo? Si no, lo patea.
   await AccesoPlan(id); 
 
+  // MODIFICADO: Declaración e inicialización de la variable base que faltaba en este controlador
   const esSupervisor = location.hash.includes("supervisor/");
+  const base = esSupervisor ? "supervisor" : "voluntario";
   
   // Fetch Cabecera Datos Básicos Flia 
   const planFamiliar = await api.get(`familyPlans/${id}`);

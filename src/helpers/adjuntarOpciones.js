@@ -5,8 +5,10 @@
 import * as api from "./api";
 
 // Carga un select HTML nativo trayendo del endpoint SOLAMENTE los registros activos (is_active == 1)
+// MODIFICADO: Agregada validación de nulidad para evitar crashes si la API falla o expira (ej: sesión cerrada)
 export const adjuntar = async (combox, endpoint) => {
   const datos = await api.get(endpoint);
+  if (!datos) return;
   datos.forEach((dat) => {
     if (dat.activo == 1) {
       const option = document.createElement("option");
@@ -17,9 +19,10 @@ export const adjuntar = async (combox, endpoint) => {
   });
 };
 
-// Variante igual a 'adjuntar' pero IGNORA el estado is_active. Trae Inactivos y Activos juntos.
+// MODIFICADO: Agregada validación de nulidad
 export const adjuntarNoValida = async (combox, endpoint) => {
   const datos = await api.get(endpoint);
+  if (!datos) return;
   datos.forEach((dat) => {
     const option = document.createElement("option");
     option.value = dat.id;
@@ -28,9 +31,10 @@ export const adjuntarNoValida = async (combox, endpoint) => {
   });
 };
 
-// Adjunta opciones concatenando más de una propiedad en el label visual para enriquecer (Ej: Nombre - Cédula)
+// MODIFICADO: Agregada validación de nulidad
 export const adjuntarInfo = async (combox, endpoint, infoDato) => {
   const datos = await api.get(endpoint);
+  if (!datos) return;
   datos.forEach((dat) => {
     if (dat.activo == 1) {
       const option = document.createElement("option");
@@ -42,9 +46,10 @@ export const adjuntarInfo = async (combox, endpoint, infoDato) => {
   });
 };
 
-// Combina el llenado del combo, y además ata un evento "onChange" para autobloquear otro campo (input) sincronizado.
+// MODIFICADO: Agregada validación de nulidad y verificación preventiva de seleccionadoInfo
 export const adjuntarDouble = async (combox, endpoint,input,infoDato) => {
   const datos = await api.get(endpoint);
+  if (!datos) return;
   datos.forEach((dat) => {
     if (dat.activo  == 1) {
       const option = document.createElement("option");
@@ -57,14 +62,19 @@ export const adjuntarDouble = async (combox, endpoint,input,infoDato) => {
   combox.addEventListener("change", () => {
     const seleccionado = combox.value;
     const seleccionadoInfo = datos.find((dat) => dat.id == seleccionado);
-    input.value = seleccionadoInfo[infoDato]; // Rellena el input satélite con un dato derivado
-    input.dispatchEvent(new Event("blur"));
+    if (seleccionadoInfo) {
+      input.value = seleccionadoInfo[infoDato]; // Rellena el input satélite con un dato derivado
+      input.dispatchEvent(new Event("blur"));
+    } else {
+      input.value = "";
+    }
   });
 };
 
-// Custom builder: Puebla el selector de Miembros de familia con info hiper detalla (Nombre, doc y Parentesco)
+// MODIFICADO: Agregada validación de nulidad
 export const adjuntarMiembros = async (combox, endpoint) => {
   const datos = await api.get(endpoint);
+  if (!datos) return;
   datos.forEach((dat) => {
     const option = document.createElement("option");
     option.value = dat.id;
@@ -73,9 +83,10 @@ export const adjuntarMiembros = async (combox, endpoint) => {
   });
 };
 
-// Custom Builder: Puebla el selector de amenazas de riesgo con código ID textual y concepto
+// MODIFICADO: Agregada validación de nulidad
 export const adjuntarFactorRiesgo = async (combox, endpoint) => {
   const datos = await api.get(endpoint);
+  if (!datos) return;
   datos.forEach((dat) => {
     const option = document.createElement("option");
     option.value = dat.id;
@@ -84,10 +95,10 @@ export const adjuntarFactorRiesgo = async (combox, endpoint) => {
   });
 };
 
-// Muta y re-carga combos modernizados instanciados con el plugin "TomSelect".
-// Válidador de activos solamente.
+// MODIFICADO: Agregada validación de nulidad
 export const adjuntarReseteo = async (combox, endpoint) => {  
   const datos = await api.get(endpoint);
+  if (!datos) return;
 
   const tom = combox.tomselect; // Extrae API de TomSelect atado al DOM node
 
@@ -113,12 +124,10 @@ export const adjuntarReseteo = async (combox, endpoint) => {
   tom.enable(); // 🔥 Vuelve a habilitarlo visualmente
 };
 
-// Gemelo de "adjuntarReseteo" pero incluye compatibilidad si fue invocado en un combobox Normal por despiste.
-// Y no filtra por `is_active`.
+// MODIFICADO: Agregada validación de nulidad
 export const adjuntarReseteoNoValida = async (combox, endpoint) => {
   const datos = await api.get(endpoint);
-
-  // if(!datos) return;
+  if (!datos) return;
 
   // 🔥 Si tiene la API de TomSelect corriendo allí adentro
   if (combox.tomselect) {
