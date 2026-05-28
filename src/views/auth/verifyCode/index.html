@@ -31,7 +31,13 @@
                 <p class="decoration__text">o</p>
                 <div class="decoration__linea"></div>
             </div>
-            <button id="volver" class=" boton boton--azul">Reenviar codigo</button>
+            <!-- 
+                Botón de Reenviar Código
+                Sirve para: Permitir al usuario solicitar un nuevo código de recuperación sin tener que volver a escribir su correo electrónico
+                Qué hace: Dispara el evento del controlador para mandar una petición de reenvío asíncrona
+                Por qué es importante: Definir type="button" es indispensable para que el botón no sea tratado como submit del formulario y no dispare la validación de los 6 dígitos
+            -->
+            <button id="volver" type="button" class=" boton boton--azul">Reenviar codigo</button>
         </form>
     </div>
 </div>

@@ -1,4 +1,5 @@
 import * as alerta from "../../../helpers/alertas";
+import * as api from "../../../helpers/api";
 
 export default async () => {
   const form = document.querySelector(".form");
@@ -6,10 +7,10 @@ export default async () => {
   const confirmarClave = document.getElementById("confirmarContraseña");
   const boton = document.querySelector(".boton");
 
-  // Obtener el token que se verificó en el paso anterior
+  // Si alguien intenta entrar a esta URL escribiendo el hash directo sin pasar por el token
   const tokenValidado = sessionStorage.getItem("recovery_token");
   if (!tokenValidado) {
-    window.location.href = "#/forgot-password";
+    window.location.href = "#/forgotPassword"; // CORREGIDO: clave del router es "forgotPassword" (sin guión)
     return;
   }
 
@@ -20,39 +21,28 @@ export default async () => {
     if (procesoPeticion) return;
 
     if (nuevaClave.value !== confirmarClave.value) {
-      await alerta.alertaWarning("Error", "Las contraseñas no coinciden.");
+      await alerta.alertaWarning("Inconsistencia", "Las contraseñas ingresadas no coinciden.");
       return;
     }
 
     boton.disabled = true;
     procesoPeticion = true;
 
-    try {
-      const response = await fetch("/api/changePassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token: tokenValidado,
-          password: nuevaClave.value
-        })
-      });
+    // Consumimos tu post enviando el token y la contraseña
+    const json = await api.post("changePassword", {
+      token: tokenValidado,
+      password: nuevaClave.value
+    });
 
-      const json = await response.json();
-
-      if (response.ok && json.success) {
-        await alerta.alertaSuccess("Excelente", json.message);
-        
-        // Limpieza absoluta de la memoria temporal
-        sessionStorage.clear();
-        
-        window.location.href = "#/login"; // Fin del ciclo
-      } else {
-        await alerta.alertaError("Error", json.message || "No se pudo actualizar.");
-        boton.disabled = false;
-        procesoPeticion = false;
-      }
-    } catch (err) {
-      await alerta.alertaError("Error", "Fallo de infraestructura.");
+    if (json && json.success) {
+      await alerta.alertaOK(json.message); // alertaOK es la función de éxito en alertas.js (alertaSuccess no existe)
+      
+      // Limpieza de seguridad total de la pestaña
+      sessionStorage.clear();
+      
+      window.location.href = "#/login"; // Fin del proceso seguro
+    } else {
+      await alerta.alertaError((json && json.message) || "No se pudo actualizar la contraseña."); // alertaError solo acepta 1 parámetro (el mensaje), sin título
       boton.disabled = false;
       procesoPeticion = false;
     }

@@ -77,6 +77,20 @@ export const router = async (app) => {
     const esPrivada = ruta.config?.private ?? false;
     const permissions = ruta.config?.permissions ?? [];
 
+    // Redirección de usuarios autenticados que intentan acceder a páginas de autenticación pública
+    // Sirve para: Prevenir que un usuario con sesión activa acceda a formularios de login, registro o recuperación de contraseña
+    // Qué hace: Evalúa si la ruta no es privada (!esPrivada) y el usuario ya está autenticado (isAuth() es true). Si el segmento de la URL es una página pública de inicio, invoca a volverHome() para redirigir al panel correspondiente.
+    // Por qué es importante: Protege la experiencia de navegación del usuario, impidiendo que rompa el flujo de trabajo activo de su sesión al navegar hacia atrás o escribir la URL manualmente
+    if (!esPrivada && isAuth()) {
+        const segmentoPrincipal = arregloHash[0] === "" ? (arregloHash[1] ?? "") : (arregloHash[0] ?? "");
+        const paginasDeAutenticacion = ["", "login", "register", "forgotPassword", "verifyCode", "changePassword"];
+
+        if (paginasDeAutenticacion.includes(segmentoPrincipal)) {
+            await volverHome();
+            return;
+        }
+    }
+
     /**
      * Verifica autenticación para rutas privadas.
      */

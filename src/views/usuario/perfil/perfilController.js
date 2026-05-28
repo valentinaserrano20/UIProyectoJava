@@ -1,13 +1,10 @@
 /**
- * Controlador: Perfil de Usuario (perfilController.js)
- * Gestiona la interfaz Mi Perfil, cargando los datos personales del usuario activo 
- * desde la API, y habilitando la edición controlada (con contraseñas de confirmación) 
- * de datos sensibles como Teléfono, Correo y Contraseña. 
- * También maneja el cierre de sesión seguro.
+ * Controlador: Perfil de Usuario (perfilController.js - Refactorizado Seguro)
+ * Capa: SPA Frontend
+ * Responsabilidad: Gestionar los datos del usuario basándose estrictamente en la HttpSession de Java.
  */
 import * as alerta from "../../../helpers/alertas";
 import * as api from "../../../helpers/api";
-import * as cargarDatos from "../../../helpers/cargarDatos";
 
 export default async () => {
     // Referencias al DOM (Campos de Muestra)
@@ -26,24 +23,25 @@ export default async () => {
 
     const botonCerrarSesion = document.getElementById("botonCerrarSesion");
     const botonBack = document.getElementById("botonBack");
-    botonBack.onclick = () => {
-        history.back();
-    };
+    if (botonBack) {
+        botonBack.onclick = () => { history.back(); };
+    }
 
-
+    // Nodos de control Teléfono
     const botonEditarTelefono = document.getElementById('botonEditarTelefono');
     const accionesTelefono = document.getElementById('accionesTelefono');
     const passwordTelefono = document.getElementById('passwordTelefono');
     const botonCancelarTelefono = document.getElementById('botonCancelarTelefono');
     const botonGuardarTelefono = document.getElementById('botonGuardarTelefono');
 
-
+    // Nodos de control Correo
     const botonEditarCorreo = document.getElementById('botonEditarCorreo');
     const accionesCorreo = document.getElementById('accionesCorreo');
     const passwordCorreo = document.getElementById('passwordCorreo');
     const botonCancelarCorreo = document.getElementById('botonCancelarCorreo');
     const botonGuardarCorreo = document.getElementById('botonGuardarCorreo');
 
+    // Nodos de control Contraseña
     const botonEditarPassword = document.getElementById('botonEditarPassword');
     const accionesPassword = document.getElementById('accionesPassword');
     const passwordOriginal = document.getElementById('passwordOriginal');
@@ -52,94 +50,173 @@ export default async () => {
     const botonCancelarPassword = document.getElementById('botonCancelarPassword');
     const botonGuardarPassword = document.getElementById('botonGuardarPassword');
 
+    // =========================================================================
+    // 📡 CARGA ASÍNCRONA DE DATOS DESDE LA SESIÓN SEGURA DE JAVA
+    // =========================================================================
+    // Consumimos directamente la sesión del backend. Ya no leemos localStorage.getItem("id")
+    const datosPerfil = await api.get("users/profile");
 
-    const id = localStorage.getItem("id");
-    await cargarDatos.cargarDatos(`users/${id}`,[nombres, apellidos,tipoDocumento,numeroDocumento,fechaNacimiento,genero,seccional,organizacion,telefono,correo], ["names", "last_names","document_type","document_number","birth_date","gender","sectional","organization","phone","email"],);
+    if (!datosPerfil) {
+        // Si el token/cookie de sesión venció, api.js disparará la redirección automática
+        return;
+    }
 
+    // Inyectar datos físicos en las cajas de texto del HTML
+    nombres.value = datosPerfil.names || "";
+    apellidos.value = datosPerfil.last_names || "";
+    tipoDocumento.value = datosPerfil.document_type || "";
+    numeroDocumento.value = datosPerfil.document_number || "";
+    fechaNacimiento.value = datosPerfil.birth_date || "";
+    genero.value = datosPerfil.gender || "";
+    seccional.value = datosPerfil.sectional || "";
+    organizacion.value = datosPerfil.organization || "";
+    telefono.value = datosPerfil.phone || "";
+    correo.value = datosPerfil.email || "";
+
+    // Renderizar Header dinámico de la tarjeta Banner
     const iniciales = document.getElementById('iniciales');
     const nombreCompleto = document.getElementById('nombreCompleto');
     const rangoDefensa = document.getElementById('rangoDefensa');
-    iniciales.textContent = nombres.value[0]+apellidos.value[0];
-    nombreCompleto.textContent = `${nombres.value} ${apellidos.value}`;
-    rangoDefensa.textContent = `${seccional.value} •${organizacion.value}`;
 
+    if (iniciales) iniciales.textContent = (nombres.value[0] || "") + (apellidos.value[0] || "");
+    if (nombreCompleto) nombreCompleto.textContent = `${nombres.value} ${apellidos.value}`;
+    if (rangoDefensa) rangoDefensa.textContent = `${seccional.value} • ${organizacion.value}`;
+
+    // =========================================================================
+    // 🔐 LOGOUT SEGURO
+    // =========================================================================
     botonCerrarSesion.addEventListener("click", async () => {
-        const pregunta = await alerta.alertaQuest(
-            "¿Seguro que quieres cerrar sesion?",
-        );
+        const pregunta = await alerta.alertaQuest("¿Seguro que quieres cerrar sesión?");
         if (pregunta.isConfirmed) {
             await api.post("logout");
-            window.location.href = "#/login";
             localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "#/login";
         }
     });
 
-    botonEditarTelefono.addEventListener("click", async () => {
-        const guardado = telefono.value;
+    // =========================================================================
+    // 📱 INTERACCIÓN: MODIFICAR TELÉFONO
+    // =========================================================================
+    let telefonoGuardadoMemoria = telefono.value;
+    botonEditarTelefono.addEventListener("click", () => {
+        telefonoGuardadoMemoria = telefono.value;
         telefono.disabled = false;
         accionesTelefono.classList.remove('invisible');
         passwordTelefono.parentElement.classList.remove('invisible');
+    });
 
-        botonCancelarTelefono.addEventListener("click", async () => {
+    botonCancelarTelefono.addEventListener("click", () => {
         accionesTelefono.classList.add('invisible');
         passwordTelefono.parentElement.classList.add('invisible');
         passwordTelefono.value = "";
-        telefono.value = guardado;
+        telefono.value = telefonoGuardadoMemoria;
         telefono.disabled = true;
-    })
-        botonGuardarTelefono.addEventListener("click", async () => {
-            await alerta.alertaOK('Telefono guardado exitosamente');
+    });
+
+    botonGuardarTelefono.addEventListener("click", async () => {
+        if (!telefono.value.trim() || !passwordTelefono.value.trim()) {
+            await alerta.alertaWarning("Datos faltantes", "Debe ingresar el nuevo teléfono y su contraseña de confirmación.");
+            return;
+        }
+
+        const res = await api.put("users/profile/phone", {
+            phone: telefono.value.trim(),
+            password: passwordTelefono.value.trim()
+        });
+
+        if (res && res.success) {
+            await alerta.alertaOK(res.message || 'Teléfono guardado exitosamente');
             accionesTelefono.classList.add('invisible');
             passwordTelefono.parentElement.classList.add('invisible');
             passwordTelefono.value = "";
             telefono.disabled = true;
-        })
-    })
+        } else {
+            await alerta.alertaError("Error", (res && res.message) || "No se pudo actualizar el teléfono.");
+        }
+    });
 
-    botonEditarCorreo.addEventListener("click", async () => {
-    const guardado = correo.value;
+    // =========================================================================
+    // 📧 INTERACCIÓN: MODIFICAR CORREO
+    // =========================================================================
+    let correoGuardadoMemoria = correo.value;
+    botonEditarCorreo.addEventListener("click", () => {
+        correoGuardadoMemoria = correo.value;
+        correo.disabled = false;
+        accionesCorreo.classList.remove('invisible');
+        passwordCorreo.parentElement.classList.remove('invisible');
+    });
 
-    correo.disabled = false;
-    accionesCorreo.classList.remove('invisible');
-    passwordCorreo.parentElement.classList.remove('invisible');
-
-    botonCancelarCorreo.addEventListener("click", async () => {
+    botonCancelarCorreo.addEventListener("click", () => {
         accionesCorreo.classList.add('invisible');
         passwordCorreo.parentElement.classList.add('invisible');
         passwordCorreo.value = "";
-        correo.value = guardado;
+        correo.value = correoGuardadoMemoria;
         correo.disabled = true;
     });
 
     botonGuardarCorreo.addEventListener("click", async () => {
-        await alerta.alertaOK('Correo guardado exitosamente');
-        accionesCorreo.classList.add('invisible');
-        passwordCorreo.parentElement.classList.add('invisible');
-        passwordCorreo.value = "";
-        correo.disabled = true;
-    });
+        if (!correo.value.trim() || !passwordCorreo.value.trim()) {
+            await alerta.alertaWarning("Datos faltantes", "Debe ingresar el nuevo correo y su contraseña de confirmación.");
+            return;
+        }
+
+        const res = await api.put("users/profile/email", {
+            email: correo.value.trim(),
+            password: passwordCorreo.value.trim()
+        });
+
+        if (res && res.success) {
+            await alerta.alertaOK(res.message || 'Correo guardado exitosamente');
+            accionesCorreo.classList.add('invisible');
+            passwordCorreo.parentElement.classList.add('invisible');
+            passwordCorreo.value = "";
+            correo.disabled = true;
+        } else {
+            await alerta.alertaError("Error", (res && res.message) || "No se pudo actualizar el correo.");
+        }
     });
 
-    botonEditarPassword.addEventListener("click", async () => {
+    // =========================================================================
+    // 🔑 INTERACCIÓN: MODIFICAR CONTRASEÑA
+    // =========================================================================
+    botonEditarPassword.addEventListener("click", () => {
         contrasena.parentElement.classList.add('invisible');
         passwordOriginal.parentElement.classList.remove('invisible');
         passwordNueva.parentElement.classList.remove('invisible');
         passwordNuevaRepeticion.parentElement.classList.remove('invisible');
         accionesPassword.classList.remove('invisible');
+    });
 
-        botonCancelarPassword.addEventListener("click", async () => {
-            contrasena.parentElement.classList.remove('invisible');
-            passwordOriginal.parentElement.classList.add('invisible');
-            passwordNueva.parentElement.classList.add('invisible');
-            passwordNuevaRepeticion.parentElement.classList.add('invisible');
-            accionesPassword.classList.add('invisible');
-            passwordOriginal.value = "";
-            passwordNueva.value = "";
-            passwordNuevaRepeticion.value = "";
+    botonCancelarPassword.addEventListener("click", () => {
+        contrasena.parentElement.classList.remove('invisible');
+        passwordOriginal.parentElement.classList.add('invisible');
+        passwordNueva.parentElement.classList.add('invisible');
+        passwordNuevaRepeticion.parentElement.classList.add('invisible');
+        accionesPassword.classList.add('invisible');
+        passwordOriginal.value = "";
+        passwordNueva.value = "";
+        passwordNuevaRepeticion.value = "";
+    });
+
+    botonGuardarPassword.addEventListener("click", async () => {
+        if (!passwordOriginal.value.trim() || !passwordNueva.value.trim() || !passwordNuevaRepeticion.value.trim()) {
+            await alerta.alertaWarning("Campos vacíos", "Por favor complete todos los campos de contraseña.");
+            return;
+        }
+
+        if (passwordNueva.value !== passwordNuevaRepeticion.value) {
+            await alerta.alertaWarning("Inconsistencia", "La nueva contraseña y su repetición no coinciden.");
+            return;
+        }
+
+        const res = await api.put("users/profile/password", {
+            password_actual: passwordOriginal.value.trim(),
+            password_nueva: passwordNueva.value.trim()
         });
 
-        botonGuardarPassword.addEventListener("click", async () => {
-            await alerta.alertaOK('Contraseña guardada exitosamente');
+        if (res && res.success) {
+            await alerta.alertaOK(res.message || 'Contraseña guardada exitosamente');
             contrasena.parentElement.classList.remove('invisible');
             passwordOriginal.parentElement.classList.add('invisible');
             passwordNueva.parentElement.classList.add('invisible');
@@ -148,6 +225,8 @@ export default async () => {
             passwordOriginal.value = "";
             passwordNueva.value = "";
             passwordNuevaRepeticion.value = "";
-    });
+        } else {
+            await alerta.alertaError("Error", (res && res.message) || "Contraseña actual incorrecta.");
+        }
     });
 };

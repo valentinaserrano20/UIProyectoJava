@@ -10,6 +10,12 @@
  * =========================================================
  */
 
+// Importación del helper de comunicación con la API de Java
+// Sirve para: Centralizar y estandarizar las llamadas HTTP GET/POST hacia el servidor backend
+// Qué hace: Expone funciones de red preconfiguradas con cabeceras CORS y credenciales HTTP
+// Por qué es importante: Evita tener que definir manualmente la URL base de Java y configurar headers/credentials en cada archivo, previniendo errores de ruteo erróneos en el servidor de desarrollo de Vite
+import * as api from "../../../helpers/api.js";
+
 export default async () => {
 
   // =====================================================
@@ -26,32 +32,27 @@ export default async () => {
   // VALIDACIÓN DE SESIÓN Y CARGA DE DATOS (BACKEND)
   // =====================================================
   try {
-    // Realizamos la petición al nuevo endpoint de perfil en Java
-    // Importante: Asegúrate de que tu helper de red o el fetch nativo incluya credentials: "include"
-    const response = await fetch("/api/users/profile", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
+    // Petición al endpoint del perfil del voluntario en Java mediante el helper api.js
+    // Sirve para: Solicitar la información detallada del voluntario autenticado y validar su estado de sesión en tiempo real
+    // Qué hace: Realiza una solicitud GET HTTP a la URL completa del backend 'http://localhost:8080/DCPlanes/api/users/profile'
+    // Por qué es importante: Envía la cookie 'JSESSIONID' requerida mediante credentials: 'include' para que Java reconozca la sesión del navegador
+    const data = await api.get("users/profile");
 
-    // Si el servidor responde 401 (No autorizado), limpiamos y redirigimos
-    if (response.status === 401) {
-      localStorage.clear(); // Limpieza preventiva por si acaso
+    // Verificación preventiva de los datos de la sesión
+    // Sirve para: Determinar si la llamada falló o si el token de sesión no es válido (ej. retorno de status 401 por el backend)
+    // Qué hace: Evalúa si 'data' es nulo o inválido, limpia el almacenamiento local y aborta la ejecución
+    // Por qué es importante: Al limpiar localStorage con clear(), evitamos que el router SPA entre en un bucle de redirección infinito al intentar forzar el regreso al Home por creer que la sesión sigue activa
+    if (!data) {
+      localStorage.clear();
       window.location.href = "#/login";
       return;
     }
 
-    const json = await response.json();
-
-    // Si el backend reporta un error explícito en su estructura contractual
-    if (!json.success || !json.data) {
-      window.location.href = "#/login";
-      return;
-    }
-
-    // Extraemos los datos seguros mapeados desde el Backend
-    const { full_name, gender_id } = json.data;
+    // Extracción de la identidad del voluntario desde el payload devuelto por Java
+    // Sirve para: Obtener el nombre completo del usuario y su identificador de género mapeado en la base de datos
+    // Qué hace: Realiza una desestructuración de las propiedades 'full_name' y 'gender_id' desde el objeto data
+    // Por qué es importante: Suministra los valores reales requeridos para personalizar el saludo inicial del dashboard de forma dinámica
+    const { full_name, gender_id } = data;
 
     // =====================================================
     // CONSTRUIR SALUDO DINÁMICO
@@ -71,7 +72,11 @@ export default async () => {
 
   } catch (error) {
     console.error("Error de comunicación con la API de Java:", error);
-    // Ante cualquier caída de red o error del servidor, protegemos la ruta enviando al login
+    // Limpieza de almacenamiento local ante fallos de conexión o caídas del servidor
+    // Sirve para: Borrar las credenciales persistidas en el cliente para que el enrutador no fuerce el redireccionamiento al panel privado
+    // Qué hace: Invoca a localStorage.clear() antes de mandar al login
+    // Por qué es importante: Rompe de forma preventiva los bucles infinitos de redirección del enrutador SPA
+    localStorage.clear();
     window.location.href = "#/login";
     return;
   }

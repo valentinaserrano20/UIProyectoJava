@@ -98,6 +98,24 @@ textarea:focus {
   border-color: var(--color-rojizo);
 }
 
+/* Mensaje de error que aparece debajo del input (inyectado por mostrarError en validacionInputs.js) */
+/* Es hijo directo del div.input, insertado con insertAdjacentElement("afterend") */
+span.error {
+  color: var(--color-rojizo);         /* Color rojo del sistema de diseño */
+  font-size: var(--tamano-pequeno);   /* Fuente pequeña para no ocupar mucho espacio */
+  font-family: var(--fuente-contenido);
+  margin-top: 2px;                    /* Pequeña separación visual del input */
+  display: block;                     /* Ocupa su propia línea (debajo del input) */
+  animation: aparecerError 0.2s ease; /* Micro-animación suave al aparecer */
+}
+
+/* Animación de entrada del mensaje de error (desliza suavemente desde arriba) */
+@keyframes aparecerError {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+
 .form__inputBox--double > .form__inputBox {
   width: 50%;
 }

@@ -28,24 +28,28 @@ export const TECLAS_ESPECIALES = [
 // MANEJO DE ERRORES EN EL DOM
 // =====================================================
 
-// Dibuja visualmente un mensaje de error rojo debajo o al lado del input
+// Dibuja visualmente un mensaje de error rojo debajo del input, dentro del div.input
+// El CSS inputs.css usa .input:has(> span.error) para estilizar, por eso el span DEBE
+// ser hijo directo del div.input (1 solo nivel de parentElement desde el input)
 const mostrarError = (input, mensaje) => {
   limpiarError(input); // Borra cualquier error anterior para no apilarlos
 
-  // Crea una nueva etiqueta <span> e inyecta la clase CSS ".error" y el texto descriptivo
+  // Crea una nueva etiqueta <span> con la clase CSS ".error" y el texto descriptivo
   const span = document.createElement("span");
   span.className = "error";
   span.textContent = mensaje;
 
-  // Sube dos niveles en el DOM (doble parentElement) para inyectarlo en el contenedor del input
-  input.parentElement.parentElement.append(span);
+  // Sube 1 nivel: input → div.input, e inserta el span DESPUÉS del input (debajo visualmente)
+  input.insertAdjacentElement("afterend", span);
 };
 
-// Busca si hay un span ".error" colgando del contenedor del input y lo destruye
+// Busca si hay un span ".error" hermano del input y lo destruye
 export const limpiarError = (input) => {
-  const error = input.parentElement.parentElement.querySelector(".error");
+  // El span.error es hermano del input (insertado con afterend), lo busca en el padre directo
+  const error = input.parentElement.querySelector(".error");
   if (error) error.remove();
 };
+
 
 // Función auxiliar envoltura: Invoca el dibujo del error y retorna automáticamente 'false' 
 // para cortar el flujo de validación avisando que falló

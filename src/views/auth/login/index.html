@@ -10,6 +10,8 @@
             <form class="form">
                 <h2 class="form__titulo">Bienvenido!</h2>
                 <h4 class="form__subtitulo">Inicie Sesión</h4>
+                <!-- div.input: el span.error se inyecta dentro de este div via mostrarError() en validacionInputs.js -->
+                <!-- CSS inputs.css línea 82: .input:has(> span.error) aplica el estilo de error cuando el span está dentro del .input -->
                 <div class="input">
                     <input type="text" class="input--naranja" id="correo" placeholder="Correo Electronico" autocomplete="off" data-tipo="correo">
                 </div>
