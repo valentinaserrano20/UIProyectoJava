@@ -60,6 +60,155 @@ const voluntarioRoute = { private: true, permissions: ['home-frontend.voluntario
 const supervisorRoute = { private: true, permissions: ['home-frontend.supervisor'] };
 // Rol 2 tiene acceso tanto a /supervisor como a /administrador según LoginServlet
 const adminRoute      = { private: true, permissions: ['home-frontend.administrador'] };
+
+// =========================================================
+// RUTAS COMPARTIDAS DEL PLAN FAMILIAR
+// =========================================================
+// Estas rutas son idénticas para voluntario y supervisor.
+// Solo difieren en los permisos de acceso.
+// Se definen aquí una sola vez para evitar duplicación.
+
+const rutasPlanFamiliarBase = {
+  // FAMILIA MENU: Se presentan en forma de listado las opciones de edicion del plan familiar
+  familia: {
+    path: `voluntario/verPlanFamiliar/menu/index.html`,
+    controlador: verPlan.MenuController,
+  },
+
+  // 1. DATOS
+  datos: {
+    path: `voluntario/planDatos/editar/index.html`,
+    controlador: planDatos.EditarController,
+  },
+
+  // 2. INTEGRANTES
+  integrantes: {
+    "": {
+      path: `voluntario/planIntegrante/index.html`,
+      controlador: Planintegrante.verPlanIntegrantes,
+    },
+    crear: {
+      path: `voluntario/planIntegrante/crear/index.html`,
+      controlador: Planintegrante.crearController,
+    },
+    editar: {
+      path: `voluntario/planIntegrante/editar/index.html`,
+      controlador: Planintegrante.editarController,
+    }
+  },
+
+  // 3. Mascotas y animales
+  mascotas: {
+    "": {
+      path: `voluntario/planMascota/index.html`,
+      controlador: planMascota.verPlanMascota,
+    },
+    crear: {
+      path: `voluntario/planMascota/crear/index.html`,
+      controlador: planMascota.crearController,
+    },
+    editar: {
+      path: `voluntario/planMascota/editar/index.html`,
+      controlador: planMascota.editarController,
+    }
+  },
+
+  // 4. Factores de Riesgo
+  factores_de_riesgo: {
+    "": {
+      path: `voluntario/planRiesgo/index.html`,
+      controlador: planRiesgo.verPlanRiesgo,
+    },
+    crear: {
+      path: `voluntario/planRiesgo/crear/index.html`,
+      controlador: planRiesgo.crearController,
+    },
+    editar: {
+      path: `voluntario/planRiesgo/editar/index.html`,
+      controlador: planRiesgo.editarController,
+    }
+  },
+
+  // 5. Recursos Disponibles
+  recursos: {
+    "": {
+      path: `voluntario/planRecurso/index.html`,
+      controlador: planRecurso.verController,
+    },
+    crear: {
+      path: `voluntario/planRecurso/crear/index.html`,
+      controlador: planRecurso.crearController,
+    },
+    editar: {
+      path: `voluntario/planRecurso/editar/index.html`,
+      controlador: planRecurso.editarController,
+    }
+  },
+
+  grafico_del_entorno: {
+    path: `voluntario/planEntorno/editar/index.html`,
+    controlador: PlanEntorno.EditarController,
+  },
+
+  georeferenciacion: {
+    path: `voluntario/georeferenciacion/index.html`,
+    controlador: GeoreController.GeoreController,
+  },
+
+  grafico_vivienda: {
+    "": {
+      path: `voluntario/planGrafico/index.html`,
+      controlador: PlanGrafico.verController,
+    },
+    crear: {
+      path: `voluntario/planGrafico/crear/index.html`,
+      controlador: PlanGrafico.crearController,
+    },
+    editar: {
+      path: `voluntario/planGrafico/editar/index.html`,
+      controlador: PlanGrafico.editarController,
+    }
+  },
+
+  plan_de_accion: {
+    antes: {
+      path: `voluntario/planAccion/index.html`,
+      controlador: planAccion.antes,
+    },
+    durante: {
+      path: `voluntario/planAccion/index.html`,
+      controlador: planAccion.durante,
+    },
+    despues: {
+      path: `voluntario/planAccion/index.html`,
+      controlador: planAccion.despues,
+    }
+  }
+};
+
+// Helper para aplicar configuración de permisos a las rutas compartidas
+const aplicarConfiguracion = (rutas, config) => {
+  const resultado = {};
+  
+  for (const key in rutas) {
+    if (typeof rutas[key] === 'object' && !rutas[key].path && !rutas[key].controlador) {
+      // Es un objeto anidado (ej: integrantes con "", crear, editar)
+      resultado[key] = aplicarConfiguracion(rutas[key], config);
+    } else {
+      // Es una ruta terminal
+      resultado[key] = {
+        ...rutas[key],
+        config: { ...config }
+      };
+    }
+  }
+  
+  return resultado;
+};
+
+// Rutas compartidas con configuración para cada rol
+const rutasPlanFamiliarVoluntario = aplicarConfiguracion(rutasPlanFamiliarBase, voluntarioRoute);
+const rutasPlanFamiliarSupervisor = aplicarConfiguracion(rutasPlanFamiliarBase, supervisorRoute);
 // =========================================================
 
 
@@ -113,7 +262,7 @@ export const routes = {
     },
 
     plan_familiar: {
-
+      // Rutas exclusivas de voluntario
       crear: {
         path: `voluntario/planFamiliar/crear/index.html`,
         controlador: planFamiliar.CrearController,
@@ -140,152 +289,8 @@ export const routes = {
         },
       },
 
-      georeferenciacion: {
-        path: `voluntario/georeferenciacion/index.html`,
-        controlador: GeoreController.GeoreController,
-        config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-      },
-
-      // FAMILIA MENU: Se presentan en forma de listado las opciones de edicion del plan familiar como: datos, integrantes, mascotas, recursos, etc...
-      familia: {
-        path: `voluntario/verPlanFamiliar/menu/index.html`,
-        controlador: verPlan.MenuController,
-        config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-      },
-
-      // 1. DATOS
-      datos: {
-        path: `voluntario/planDatos/editar/index.html`,
-        controlador: planDatos.EditarController,
-        config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-      },
-
-      // 2. INTEGRANTES
-      integrantes: {
-
-        "": {
-          path: `voluntario/planIntegrante/index.html`,
-          controlador: Planintegrante.verPlanIntegrantes,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-
-        crear: {
-          path: `voluntario/planIntegrante/crear/index.html`,
-          controlador: Planintegrante.crearController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-
-        editar: {
-          path: `voluntario/planIntegrante/editar/index.html`,
-          controlador: Planintegrante.editarController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        }
-      },
-
-      // 3. Mascotas y animales
-      mascotas: {
-        "": {
-          path: `voluntario/planMascota/index.html`,
-          controlador: planMascota.verPlanMascota,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        crear: {
-          path: `voluntario/planMascota/crear/index.html`,
-          controlador: planMascota.crearController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        editar: {
-          path: `voluntario/planMascota/editar/index.html`,
-          controlador: planMascota.editarController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        }
-      },
-
-      // 4. Factores de Riesgo
-
-      factores_de_riesgo: {
-        "": {
-          path: `voluntario/planRiesgo/index.html`,
-          controlador: planRiesgo.verPlanRiesgo,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        crear: {
-          path: `voluntario/planRiesgo/crear/index.html`,
-          controlador: planRiesgo.crearController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        editar: {
-          path: `voluntario/planRiesgo/editar/index.html`,
-          controlador: planRiesgo.editarController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        }
-      },
-
-      // 5. Recursos Disponibles
-
-      recursos: {
-        "": {
-          path: `voluntario/planRecurso/index.html`,
-          controlador: planRecurso.verController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        crear: {
-          path: `voluntario/planRecurso/crear/index.html`,
-          controlador: planRecurso.crearController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        editar: {
-          path: `voluntario/planRecurso/editar/index.html`,
-          controlador: planRecurso.editarController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        }
-      },
-
-      grafico_del_entorno: {
-
-        path: `voluntario/planEntorno/editar/index.html`,
-        controlador: PlanEntorno.EditarController,
-        config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-
-      },
-
-      grafico_vivienda: {
-
-        "": {
-          path: `voluntario/planGrafico/index.html`,
-          controlador: PlanGrafico.verController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        crear: {
-          path: `voluntario/planGrafico/crear/index.html`,
-          controlador: PlanGrafico.crearController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        editar: {
-          path: `voluntario/planGrafico/editar/index.html`,
-          controlador: PlanGrafico.editarController,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        }
-      },
-
-      plan_de_accion: {
-
-        antes: {
-          path: `voluntario/planAccion/index.html`,
-          controlador: planAccion.antes,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        durante: {
-          path: `voluntario/planAccion/index.html`,
-          controlador: planAccion.durante,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        },
-        despues: {
-          path: `voluntario/planAccion/index.html`,
-          controlador: planAccion.despues,
-          config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-        }
-      }
+      // Rutas compartidas con supervisor
+      ...rutasPlanFamiliarVoluntario
     }
 
   },
@@ -317,9 +322,8 @@ export const routes = {
     },
 
     plan_familiar: {
-
+      // Rutas exclusivas de supervisor
       "": {
-        
         path: `supervisor/PlanFamiliar/Listado/index.html`,
         controlador: supervisorPlanFamiliar.ListadoPlanController,
         config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
@@ -332,157 +336,13 @@ export const routes = {
       },
 
       revision: {
-
         path: `supervisor/PlanFamiliar/RevisionPlan/index.html`,
         controlador: supervisorPlanFamiliar.RevisionPlanController,
         config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
       },
-      
-      // FAMILIA MENU: Se presentan en forma de listado las opciones de edicion del plan familiar como: datos, integrantes, mascotas, recursos, etc...
-      familia: {
-        path: `voluntario/verPlanFamiliar/menu/index.html`,
-        controlador: verPlan.MenuController,
-        config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-      },
 
-      // 1. DATOS
-      datos: {
-        path: `voluntario/planDatos/editar/index.html`,
-        controlador: planDatos.EditarController,
-        config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-      },
-
-      // 2. INTEGRANTES
-      integrantes: {
-
-        "":{
-          path: `voluntario/planIntegrante/index.html`,
-          controlador: Planintegrante.verPlanIntegrantes,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-
-        crear:{
-          path: `voluntario/planIntegrante/crear/index.html`,
-          controlador: Planintegrante.crearController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-
-        editar: {
-          path: `voluntario/planIntegrante/editar/index.html`,
-          controlador: Planintegrante.editarController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        }
-      },
-
-      // 3. Mascotas y animales
-      mascotas: {
-        "":{
-          path: `voluntario/planMascota/index.html`,
-          controlador: planMascota.verPlanMascota,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        crear:{
-          path: `voluntario/planMascota/crear/index.html`,
-          controlador: planMascota.crearController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        editar:{
-          path: `voluntario/planMascota/editar/index.html`,
-          controlador: planMascota.editarController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        }
-      },
-
-      // 4. Factores de Riesgo
-
-      factores_de_riesgo: {
-        "":{
-          path: `voluntario/planRiesgo/index.html`,
-          controlador: planRiesgo.verPlanRiesgo,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        crear:{
-          path: `voluntario/planRiesgo/crear/index.html`,
-          controlador: planRiesgo.crearController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        editar:{
-          path: `voluntario/planRiesgo/editar/index.html`,
-          controlador: planRiesgo.editarController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        }
-      },
-      
-      // 5. Recursos Disponibles
-
-      recursos: {
-        "":{
-          path: `voluntario/planRecurso/index.html`,
-          controlador: planRecurso.verController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        crear:{
-          path: `voluntario/planRecurso/crear/index.html`,
-          controlador: planRecurso.crearController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        editar:{
-          path: `voluntario/planRecurso/editar/index.html`,
-          controlador: planRecurso.editarController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        }
-      },
-
-      grafico_del_entorno: {
-
-        path: `voluntario/planEntorno/editar/index.html`,
-        controlador: PlanEntorno.EditarController,
-        config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-      },
-
-      georeferenciacion: {
-        path: `voluntario/georeferenciacion/index.html`,
-        controlador: GeoreController.GeoreController,
-        config: { ...voluntarioRoute, permissions: ["home-frontend.voluntario"] },
-      },
-
-      grafico_vivienda:{
-
-        "":{
-          path: `voluntario/planGrafico/index.html`,
-          controlador: PlanGrafico.verController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        crear:{
-          path: `voluntario/planGrafico/crear/index.html`,
-          controlador: PlanGrafico.crearController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        editar:{
-          path: `voluntario/planGrafico/editar/index.html`,
-          controlador: PlanGrafico.editarController,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        }
-      },
-
-      plan_de_accion:{
-
-        antes:{
-          path: `voluntario/planAccion/index.html`,
-          controlador: planAccion.antes,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        durante:{
-          path: `voluntario/planAccion/index.html`,
-          controlador: planAccion.durante,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        },
-        despues:{
-          path: `voluntario/planAccion/index.html`,
-          controlador: planAccion.despues,
-          config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
-        }
-      }
+      // Rutas compartidas con voluntario
+      ...rutasPlanFamiliarSupervisor
     }
   },
 
