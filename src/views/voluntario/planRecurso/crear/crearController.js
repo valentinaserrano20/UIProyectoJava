@@ -114,8 +114,8 @@ export default async () => {
       // Contrato DB Endpoint Mapper Data To Object
       const datosRegistro = {
         resource_id: recurso.value,
-        description: descripcion.value,
-        location: ubicacion.value,
+        description: adjuntarOpc.capitalizarPrimeraLetra(descripcion.value),
+        location: adjuntarOpc.capitalizar(ubicacion.value.trim()),
         distance: distancia.value, // (Metros num)
         phone: telefono.value,
         family_plan_id: id, // Attach to Family Plan Tree Head

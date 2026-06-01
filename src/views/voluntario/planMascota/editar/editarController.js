@@ -118,8 +118,8 @@ export default async () => {
 
     // DTO PATCH Update DB Contract Mapping
     const datosRegistro = {
-      name: nombre.value,
-      breed: raza.value,
+      name: adjuntarOpc.capitalizar(nombre.value.trim()),
+      breed: adjuntarOpc.capitalizar(raza.value.trim()),
       birth_date: edad.value,
       species_id: especies.value,
       animal_gender_id: generos.value,

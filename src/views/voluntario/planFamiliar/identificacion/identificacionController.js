@@ -1,10 +1,10 @@
 /**
  * Controlador: Fase de Identificación del Plan (identificacionController.js)
- * Tercera etapa de la creación inicial (después de agregar la foto).
+ * Tercera etapa de la creación inicial del plan familiar (después de agregar la foto).
  * Recolecta apartados descriptivos del domicilio de la familia, sector, 
  * telefonía y detalles estructurales de la casa.
  * Si el usuario pulsa "Subir Foto" se salva en la memoria del navegador 
- * lo que tiene escrito por ahora para no perder su tiempo una vez vuelva de dicha pantalla.
+ * lo que tiene escrito por ahora para no perder su progreso una vez vuelva de dicha pantalla.
  */
 import * as adjuntarOpc from "../../../../helpers/adjuntarOpciones";
 import * as alerta from "../../../../helpers/alertas";
@@ -13,132 +13,143 @@ import { cargarDatos } from "../../../../helpers/cargarDatos";
 import * as localStorage from "../../../../helpers/localStorage";
 import * as validacion from "../../../../helpers/validacionInputs";
 
+// Exportación del controlador de vista de la identificación familiar
 export default async () => {
-  // Encontrar en la dirección actual el número identificador de esta familia específica
+  // Encuentra en la dirección URL actual el número identificador de esta familia específica
   const id = location.hash.split("=")[1];
+  // Obtiene el elemento del botón de volver de la interfaz
   const botonBack = document.getElementById("botonBack");
 
-  // Botones y contenedores clave de la interfaz
+  // Obtiene el elemento del formulario html
   const form = document.querySelector(".form");
+  // Obtiene el elemento del botón de siguiente paso
   const botonSiguiente = document.getElementById("botonSiguiente");
 
-  // Elementos individuales del formulario de la vivienda
+  // Obtiene el input del identificador o código de la familia
   const familia = document.getElementById("familiaId");
+  // Obtiene el input de tipo de familia clasificada (ej. Vulnerable)
   const tipoFamilia = document.getElementById("tipoFamilia");
+  // Obtiene el input de apellidos de la familia
   const apellidos = document.getElementById("apellidos");
-  const dirrecion = document.getElementById("dirrecion"); // Calle / Carrera
+  // Obtiene el input de dirección física del domicilio
+  const dirrecion = document.getElementById("dirrecion");
+  // Obtiene el select para elegir los sectores geográficos
   const sector = document.getElementById("sectores");
-  const sectorNombre = document.getElementById("sectorNombre"); // Aclaración textual de ubicación
+  // Obtiene el input para especificar de forma textual el nombre del sector/barrio
+  const sectorNombre = document.getElementById("sectorNombre");
+  // Obtiene el input del teléfono fijo de la vivienda
   const telefono = document.getElementById("telefonoFijo");
+  // Obtiene el select para elegir la calidad o régimen de la vivienda (ej. Propia)
   const calidad = document.getElementById("calidadesVivienda");
 
-  // Bloqueo de seguridad para que el usuario no envíe dos veces las peticiones si oprimen muy rápido
+  // Inicializa la variable de control de peticiones concurrentes si no existe
   if (window.procesoPeticion === undefined) {
     window.procesoPeticion = true;
   }
+  // Bloquea temporalmente el flujo de interfaz al inicializar la pantalla
   window.procesoPeticion = true;
 
-  // Acción al oprimir volver (Salir directamente advirtiendo pérdida)
+  // Lógica interactiva al hacer clic en el botón de retroceso (Volver)
   botonBack.onclick = async () => {
+    // Si hay una petición de red activa en el fondo, ignora la solicitud
     if (window.procesoPeticion) return;
+    // Muestra una ventana de advertencia de cancelación interactiva
     const confirmacion = await alerta.alertaQuest(
       "¿Seguro que quieres volver? perderás tu progreso",
     );
-    if (confirmacion.isConfirmed) location.href = "#/voluntario"; // Abandona devolviendo a la pantalla principal
+    // Si el usuario confirma, lo redirige al panel inicial de planes familiares
+    if (confirmacion.isConfirmed) location.href = "#/voluntario";
   };
 
-  // Primera consulta: Traer la información básica que este mismo voluntario guardó en el Paso 1
+  // Petición GET inicial para precargar los datos básicos del plan familiar registrados en el paso 1
   cargarDatos(`familyPlans/${id}`, [familia, apellidos, tipoFamilia], ["id", "last_names", "family_type"]);
   
-  // Llenar las listas desplegables utilizando datos concretos del servidor
-  await adjuntarOpc.adjuntarNoValida(sector, "sectors");
-  await adjuntarOpc.adjuntarNoValida(calidad, "housingQualities");
+  // Realiza la petición GET en segundo plano para rellenar el select de sectores usando la ruta del PublicServlet
+  await adjuntarOpc.adjuntarNoValida(sector, "public/sectors");
+  // Realiza la petición GET en segundo plano para rellenar el select de calidades de vivienda usando la ruta del PublicServlet
+  await adjuntarOpc.adjuntarNoValida(calidad, "public/housingQualities");
   
-  // Adornar el título de la familia para el deleite visual 
+  // Concatena texto decorativo al campo del ID de familia para mejorar la presentación visual
   familia.value = `Familia segura N.${familia.value}`;
 
+  // Concatena texto aclaratorio al tipo de familia obtenido
   tipoFamilia.value = `Tipo de familia: ${tipoFamilia.value}`;
   
-  // TRUCO TEMPORAL: Si el usuario había abandonado esta pantalla para ir a subir la fotografía,
-  // el sistema automáticamente recupera todo lo que este hubiese escrito para no obligarlo a digitar nuevamente
+  // Recupera automáticamente los datos temporales del formulario guardados en localStorage si el usuario salió a subir foto
   localStorage.importacionLocalStorage("identificacion");
 
-  // Habilitar la interacción general una vez que la pantalla termina de cargar lo básico
+  // Habilita el botón de siguiente al concluir la carga inicial de todos los catálogos
   botonSiguiente.disabled = false;
+  // Libera el bloqueo de peticiones de la interfaz
   window.procesoPeticion = false;
 
+  // Inicializa el validador automático de expresiones regulares de los inputs del formulario
   validacion.validadorAutomatico.init(form);
 
-  // Lógica principal de actualización hacia el servidor permanente
+  // Escucha el submit del formulario para procesar el envío de datos al backend
   form.addEventListener("submit", async (e) => {
+    // Previene el comportamiento nativo de recarga de página del submit
     e.preventDefault();
     
+    // Valida todos los inputs del formulario contra las expresiones regulares del validador
     const booleanValidacion = validacion.validadorAutomatico.validarTodo(form);
     
-    // Si algún proceso falló (Regex o Identidad)
+    // Si alguna de las validaciones locales de inputs falla
     if (!booleanValidacion)
     {
-      window.procesoPeticion = false // Abre exclusa de bugs
-      botonSiguiente.disabled = false; // Suelta boton
-      return // Corta
+      // Libera el control de la interfaz para permitir corregir errores
+      window.procesoPeticion = false;
+      // Vuelve a habilitar el botón
+      botonSiguiente.disabled = false;
+      // Interrumpe el guardado
+      return;
     }
 
-    // Bloquear Interfaz
+    // Deshabilita el botón siguiente para prevenir envíos duplicados por clics rápidos
     botonSiguiente.disabled = true;
+    // Bloquea el flujo marcando que hay una petición HTTP activa
     window.procesoPeticion = true;
       
-      // Colección exacta de elementos a viajar al servidor
-      const datosRegistro = {
-        last_names: apellidos.value,
-        address: dirrecion.value,
-        sector_id: sector.value,
-        sector_name: sectorNombre.value,
-        landline_phone: telefono.value,
-        housing_quality_id: calidad.value,
-      };
+    // Estructura el objeto de datos que viajará al servidor en el cuerpo del PATCH
+    const datosRegistro = {
+      // Formatea a Title Case y remueve espacios en los apellidos familiares
+      last_names: adjuntarOpc.capitalizar(apellidos.value.trim()),
+      // Formatea a Title Case y remueve espacios en la dirección
+      address: adjuntarOpc.capitalizar(dirrecion.value.trim()),
+      // ID del sector relacional seleccionado
+      sector_id: sector.value,
+      // Formatea a Title Case y remueve espacios en el nombre descriptivo del sector/barrio
+      sector_name: adjuntarOpc.capitalizar(sectorNombre.value.trim()),
+      // Remueve espacios en el teléfono fijo
+      landline_phone: telefono.value.trim(),
+      // ID de calidad de vivienda relacional seleccionada
+      housing_quality_id: calidad.value,
+    };
 
-      try {
-        // Enviar esta porción de información indicándole al servidor que solo actualice estos campos específicos 
-        const data = await api.patch(
-          `familyPlans/${id}/identify`,
-          datosRegistro,
-        );
-        if (data.success) {
-          
-          await alerta.alertaOK(data.message);
-          
-          // Verificar al final, a modo de advertencia, si el Voluntario se le olvidó adjuntar la foto!
-          // const geo = await api.getExiste(`housingInfo/${id}`);
-          // !geo
-          //   ? await alerta.alertaWarning("Se puede agregar la Georeferenciacion despues...",: "";
-            
-          // Tras terminar esta fase, direcciona definitivamente al Voluntario al menú o escritorio principal de esta nueva familia
-          location.href= `#/voluntario/plan_familiar/familia?id=${id}`;
-        } else alerta.alertaWarning(data.message, data.errors);
-      } catch (error) {
-        alerta.alertaError(error.errors); // Muestra falla rotunda de red
+    try {
+      // Envía la petición PATCH con el lote de datos al endpoint de identificación
+      const data = await api.patch(
+        `familyPlans/${id}/identify`,
+        datosRegistro,
+      );
+      // Si la actualización es exitosa en el backend
+      if (data.success) {
+        // Muestra la alerta de éxito verde
+        await alerta.alertaOK(data.message);
+        // Redirige al voluntario al panel principal (familia) del plan
+        location.href= `#/voluntario/plan_familiar/familia?id=${id}`;
+      } else {
+        // Si hay errores de validación de negocio devueltos por el backend, muestra alerta amarilla
+        await alerta.alertaWarning(data.message, data.errors);
       }
+    } catch (error) {
+      // Captura excepciones de red y muestra alerta roja
+      alerta.alertaError(error.errors);
+    }
     
-    // Al finalizar vuelve a habilitar su uso por si ocurrio algún rechazo de datos
+    // Libera la interfaz en caso de que la validación del servidor haya fallado para permitir reintentos
     botonSiguiente.disabled = false;
+    // Desbloquea la interfaz
     window.procesoPeticion = false;
   });
-
-  // MAGIA TEMPORAL: Evento generado al tocar el botón de "Agregar Fotografía / Geoferencia"
-  // botonGeo.addEventListener("click", (e) => {
-  //   if (window.procesoPeticion) return;
-  //   e.preventDefault();
-    
-  //   // Almacena de manera invisible o temporal los datos en la Memoria RAM del navegador de todo lo escrito
-  //   localStorage.envioLocalStorage([
-  //     dirrecion,
-  //     sector,
-  //     sectorNombre,
-  //     telefono,
-  //     calidad,
-  //   ]);
-    
-  //   // Permite que la aplicación salte a la siguiente pantalla para subir su foto sin temor a perder la información tipeada
-  //   location.href = `#/voluntario/plan_familiar/identificacion/georeferenciacion?id=${id}`;
-  // });
 };

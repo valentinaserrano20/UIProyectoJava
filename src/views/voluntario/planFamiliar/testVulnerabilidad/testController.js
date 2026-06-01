@@ -66,6 +66,35 @@ export default async () => {
     paginado.appendChild(p); // Colocar este nuevo número creado en pantalla
   }
 
+  // Bloque try-catch para evitar que una falla de red al precargar rompa la carga inicial del formulario
+  try {
+    // Realiza una petición GET al backend para recuperar respuestas que ya se hayan guardado anteriormente
+    const respuestasGuardadas = await api.get(`vulnerableTest?family_plan_id=${id}`);
+    // Valida que la respuesta sea exitosa y que el servidor haya devuelto datos válidos en el nodo data
+    if (respuestasGuardadas && respuestasGuardadas.success && respuestasGuardadas.data) {
+      // Itera por cada una de las respuestas recuperadas desde la base de datos
+      respuestasGuardadas.data.forEach(resp => {
+        // Define la clave asociativa que identifica el input radio en el frontend (ej. opcion-1)
+        const name = `opcion-${resp.vulnerable_question_id}`;
+        // Convierte el valor booleano de la respuesta a texto ("true"/"false") para marcar los controles html
+        const valStr = resp.answer ? "true" : "false";
+        // Asigna el valor al mapa de respuestas cargadas en memoria para inicializar el estado del test
+        testRespuestas.respuesta[name] = valStr;
+        
+        // Verifica si la respuesta recuperada corresponde a una vulnerabilidad afirmada (SÍ)
+        if (resp.answer) {
+          // Si es SÍ, crea el marcador temporal de puntaje que se utiliza para el conteo interno
+          testRespuestas.puntaje[`puntaje-${name}`] = true;
+        }
+      });
+      // Inicializa el contador del objeto con la cantidad de vulnerabilidades iniciales marcadas como SÍ
+      testRespuestas.contador = Object.keys(testRespuestas.puntaje).length;
+    }
+  } catch (err) {
+    // Si la petición falla, reporta el error en la consola del desarrollador sin detener la aplicación
+    console.error("Error al precargar respuestas:", err);
+  }
+
   // Activa todo el motor que empieza a solicitarle ya mismo el texto exacto de dichas preguntas de la DB
   await cargarPagina();
 
@@ -207,146 +236,113 @@ export default async () => {
    * luego los comunica 1 por 1 al Servidor y emite una condena de Si esta o no Aptada para ingresar a la plataforma.
    */
   async function evaluarTest() {
+    // Muestra una ventana de confirmación interactiva preguntando al voluntario si está seguro de enviar el test
     const preguntaContinuar = await alerta.alertaQuest(
       "¿Seguro que deseas enviar el test de vulnerabilidad?",
     );
-    if (!preguntaContinuar.isConfirmed) return; // Anular si la respuesta fue un simple No de cancelación
+    // Si el voluntario cancela o pulsa "NO", detiene la ejecución inmediatamente
+    if (!preguntaContinuar.isConfirmed) return;
 
+    // Deshabilita el botón de siguiente para evitar envíos múltiples si el voluntario hace doble clic
     siguiente.disabled = true;
+    // Bloquea el flujo del controlador marcando que hay una petición de red en proceso
     window.procesoPeticion = true;
 
-    // Chequeo Masivo Exigido a Servidor: Lista de nuevo TODA la biblia de preguntas inamovibles
+    // Realiza una petición GET al backend para consultar la lista completa y actualizada de preguntas
     const verPreguntas = await api.get("vulnerableQuestions");
 
-    // Registro o Inventario Contable del rendimiento
-    let total = 0; // Preguntas que existían en verdad obligatoriamente
-    let respondidas = 0; // Lo que el usuario intentó llenar
-    let puntos = 0; // Calificación Oficial lograda en Puntos de Salvación
+    // Inicializa la variable para contar cuántas preguntas totales están habilitadas
+    let total = 0;
+    // Inicializa la variable para contar cuántas de esas preguntas han sido contestadas por el voluntario
+    let respondidas = 0;
+    // Inicializa la variable para calcular el puntaje final de vulnerabilidades (SÍ a preguntas de riesgo)
+    let puntos = 0;
 
-    // Revisión Pregunta x Pregunta usando un Bucle sobre aquello resuelto
+    // Recorre una a una todas las preguntas obtenidas del servidor
     verPreguntas.forEach((p) => {
-      // Ignora posibles preguntas Basura que el Director allá decidió "Apagar o Esconder", evitando colapsar al que llenó la planilla
+      // Si la pregunta no está marcada como activa en el backend, la omite del proceso
       if (!p.is_active) {
-        window.procesoPeticion = false;
-        siguiente.disabled = false;
         return;
       }
-      total++; // +1 Pregunta legal y contable a calificar
+      // Incrementa el conteo de preguntas obligatorias que deben responderse
+      total++;
 
-      // const respuesta = localStorage.getItem(`opcion-${p.id}`); // Búsqueda de la solución en su memoria Móvil
-
+      // Obtiene el estado de la respuesta guardada en memoria para esta pregunta (ej. "true", "false" o undefined)
       const respuesta = testRespuestas.respuesta[`opcion-${p.id}`];
 
-      if (respuesta !== null) respondidas++; // Sumatoria informando de que al menos fue llena
+      // Si la respuesta no es indefinida, significa que el voluntario seleccionó alguna de las dos opciones
+      if (respuesta !== undefined) respondidas++;
 
-      // Regla Contable: Solo se gana el punto deseado sí no es una advertencia mortal (Caution)
-      // y sumado a eso, el servidor logra hallar que sí poseía el famoso Token guardador en RAM de "Puntaje"
-      if (
-        !p.question_caution &&
-        // localStorage.getItem(`puntaje-opcion-${p.id}`)
-        testRespuestas.puntaje[`puntaje-opcion-${p.id}`]
-      ) {
+      // Si la pregunta no es de precaución (es de riesgo) y el usuario respondió "SÍ" (true)
+      if (!p.question_caution && respuesta === "true") {
+        // Incrementa la puntuación de vulnerabilidad de la familia
         puntos++;
       }
-
-      // Todo aqui funciona correctamente, respuesta tienen como trabajo asegurarse de la cantidad de respuestas almacenadas en la propiedad respuesta lo que aumentara el contador de "respondidas"
-      // Los datos almacenados en la propiedad de puntaje en el objeto solo guarda respuestas = true, por lo que los puntos seran iguales a la cantidad de opciones = true que hayan
-      // Esto servira para la creacion de comparaciones y convalidaciones antes de enviar los puntos del test
     });
 
-    // VEREDICTO DE TRAMPA/ERROR: El Voluntario no rellenó la cantidad adecuada (Se comió y saltó alguna pregunta)
+    // Validación del negocio: Si faltaron preguntas por responder o el total de puntos de riesgo es 0 (no aplica)
     if (respondidas < total || puntos === 0) {
-      // Advertencia en color Rojo/Amarillo
+      // Muestra una alerta de aviso indicando que el test está incompleto o no es apto para aplicar
       await alerta.alertaWarning(
-        `No ha respondido todas (${respondidas}/${total})`,
+        `No ha respondido todas o el test no aplica (${respondidas}/${total})`,
       );
+      // Libera el bloqueo de peticiones de la interfaz
       window.procesoPeticion = false;
+      // Vuelve a habilitar el botón de envío
       siguiente.disabled = false;
-      return; // Se aborta y no se envía nada
+      // Cancela el envío del test al servidor
+      return;
     }
 
-    // Animación Circular pesada de Espera pues está al lado de confirmarse todo
+    // Inicia la animación visual del spinner indicando que el guardado está en proceso
     alerta.alertaLoading();
 
-    // Serie Síncrona pesada de Guardado. Envía paquete de información de cada respueta 1 x 1 de regreso al origen general
-    for (const p of verPreguntas) {
-      if (!p.is_active) {
+    // Inicializa el arreglo que contendrá las respuestas que se enviarán juntas en un lote JSON
+    const respuestasLote = [];
+    // Recorre de nuevo las preguntas para recopilar sólo las respuestas de las preguntas activas
+    verPreguntas.forEach((p) => {
+      if (p.is_active) {
+        // Inserta en el arreglo el objeto estructurado con el id de pregunta y su valor booleano
+        respuestasLote.push({
+          vulnerable_question_id: p.id,
+          answer: testRespuestas.respuesta[`opcion-${p.id}`] === "true"
+        });
+      }
+    });
+
+    // Estructura el payload principal con el id del plan familiar y la lista de respuestas
+    const payload = {
+      family_plan_id: Number(id),
+      answers: respuestasLote
+    };
+
+    try {
+      // Envía el lote completo en una única petición HTTP POST a la ruta del backend
+      const response = await api.post("vulnerableTest", payload);
+      // Cierra la animación visual de carga al recibir respuesta del servidor
+      alerta.alertaLoadingCerrar();
+
+      // Si el servidor confirma que el guardado en base de datos y la clasificación fueron exitosos
+      if (response.success) {
+        // Muestra la alerta de éxito verde con el mensaje devuelto por el backend
+        await alerta.alertaOK(response.message);
+        // Redirige al voluntario a la vista de identificación (siguiente paso del flujo)
+        location.href = `#/voluntario/plan_familiar/identificacion?id=${id}`;
+      } else {
+        // Muestra una alerta de advertencia si ocurrieron errores de negocio en el backend
+        await alerta.alertaWarning(response.message, response.errors || "");
+        // Libera la interfaz para permitir corregir e intentar de nuevo
         window.procesoPeticion = false;
         siguiente.disabled = false;
-        // return;
-        continue; // Si la pregunta no estaba activa, no la envía pero sigue con la siguiente sin abortar todo el proceso
       }
-      // Trasteando el mapa relacional estricto con sus ID correspondientes
-      const datos = {
-        vulnerable_question_id: p.id,
-        family_plan_id: id,
-        // answer: localStorage.getItem(`opcion-${p.id}`) === "true", // Conversión exacta de lenguaje
-        answer: testRespuestas.respuesta[`opcion-${p.id}`] === "true",
-      };
-
-      // Emitir este objeto directamente
-      await api.post("vulnerableTest", datos);
-
-      // Limpiador Apto: Acabar los archivos de chatarra que ya no sirven del dispositivo personal (RAM limpia en celular)
-      // localStorage.removeItem(`opcion-${p.id}`);
-      // localStorage.removeItem(`puntaje-opcion-${p.id}`);
-      // No se necesita remover el localstorage si est ya no existe en una primera instancia, el objeto de borra por si solo una vez se cambia de vista
-    }
-
-    // Fin Proceso de limpieza y cierre
-    alerta.alertaLoadingCerrar();
-
-    // RESULTADO CUALITATIVO REPROBADO: MÍNIMO INCLUYENTE PUNTOS < 5!
-    if (puntos < 5 && respondidas === total) {
-      // Advertencia: La familia tiene grandes grietas y no rige bajo ciertos planes deseados.
-
-      try {
-        
-        const data = await api.patch(`familyPlans/${id}/change-status`, {
-          status_plan_id: 3, // 3 = EN DESARROLLO / APROBADO BÁSICO
-        });
-
-        const dataFamilyType = await api.patch(`familyPlans/${id}/change-family-type`, {
-          family_type_id: 2, // 2 = FAMILIA NO VULNERABLE
-        });
-
-        if (data.success && dataFamilyType.success) {
-
-        } else alerta.alertaWarning(data.message, data.errors || dataFamilyType.message, data.errors || dataFamilyType.errors);
-      } catch (error) {
-        alerta.alertaError(error.errors);
-      }
-
-      await alerta.alertaOK( "La familia en base al test sera catalogada como NO VULNERABLE",);
-
-      location.href = `#/voluntario/plan_familiar/identificacion?id=${id}`;
-
-      // window.procesoPeticion = false;
-      // siguiente.disabled = false;
-      return; // SE CORTA EL BLOQUE COMPLETO y no se ejecuta nada de lo que sigue debajo, pues el resultado ya fue emitido y la familia fue catalogada como No Vulnerable
-    }
-
-    // VEREDICTO FINAL DE APROBACIÓN (Mayor O Igual a 5 puntos pasables)
-    try {
-      // Emite una orden cambiando el estado para que deje la familia de ser borrador y pase a En Desarrollo.
-      const data = await api.patch(`familyPlans/${id}/change-status`, {
-        status_plan_id: 3, // 3 = EN DESARROLLO / APROBADO BÁSICO
-      });
-
-      const dataFamilyType = await api.patch(`familyPlans/${id}/change-family-type`, {
-        family_type_id: 1, // 1 = FAMILIA VULNERABLE
-      });
-
-      if (data.success && dataFamilyType.success) {
-        // Ejecución Completada sin hacer mucho ruido.
-      } else alerta.alertaWarning(data.message, data.errors || dataFamilyType.message, data.errors || dataFamilyType.errors);
     } catch (error) {
-      alerta.alertaError(error.errors);
+      // Cierra el spinner de carga si ocurrió una excepción de red
+      alerta.alertaLoadingCerrar();
+      // Muestra una alerta de error grave con el detalle de la falla de conexión
+      await alerta.alertaError(error.errors || "Error al conectar con el servidor.");
+      // Libera la interfaz para permitir reintentos
+      window.procesoPeticion = false;
+      siguiente.disabled = false;
     }
-
-    // Alerta Verde Bonita Éxito
-    await alerta.alertaOK("La familia en base al test sera catalogada como VULNERABLE",);
-    // Dirige al Voluntario al ÚLTIMO paso legal y obligatorio, con el controlador que averigua la dirección exacta (Identificación final)
-    location.href = `#/voluntario/plan_familiar/identificacion?id=${id}`;
   }
 };

@@ -45,8 +45,8 @@ export default async () => {
         // Mapper a DB Contract DTO Expected properties names 
         const datosRegistro = {
             threat_type_id: amenaza.value, // Select Foreign Key Relational Data Dict App State Value numeric id 
-            description: descripcion.value,
-            ubication: ubicacion.value,
+            description: adjuntarOpc.capitalizarPrimeraLetra(descripcion.value),
+            ubication: adjuntarOpc.capitalizar(ubicacion.value.trim()),
             distance: distancia.value,
             family_plan_id: id // Linkea Relacion Raiz (Plan Familiar) 
         };

@@ -55,11 +55,16 @@ export default async () => {
 
   // Rutina que solicita múltiples listas al servidor al mismo tiempo para llenar las opciones desplegables
   // Se usa una versión que no marca inmediatamente los campos en rojo como erróneos al cargar por primera vez
-  await adjuntarOpc.adjuntarNoValida(zonas, "zones");
-  await adjuntarOpc.adjuntarNoValida(departamentos, "departments");
-  await adjuntarOpc.adjuntarNoValida(ciudades, "cities"); // Puede volver vacío si aún no elige un departamento
-  await adjuntarOpc.adjuntarNoValida(sectores, "sectors");
-  await adjuntarOpc.adjuntarNoValida(calidadesVivienda, "housingQualities");
+  // MODIFICADO: Llamada al catálogo de zonas usando la ruta pública '/api/public/zones' para evitar error 404 del servlet principal
+  await adjuntarOpc.adjuntarNoValida(zonas, "public/zones");
+  // MODIFICADO: Llamada al catálogo de departamentos mediante la ruta pública '/api/public/departments' resolviendo el error 404
+  await adjuntarOpc.adjuntarNoValida(departamentos, "public/departments");
+  // MODIFICADO: Carga predeterminada de ciudades para el departamento de Santander (ID 1) usando la ruta pública para no generar error 404
+  await adjuntarOpc.adjuntarNoValida(ciudades, "public/cities/department/1");
+  // MODIFICADO: Llamada al catálogo de sectores a través de la ruta pública '/api/public/sectors' para prevenir error 404
+  await adjuntarOpc.adjuntarNoValida(sectores, "public/sectors");
+  // MODIFICADO: Llamada al catálogo de calidades de vivienda a través de la ruta pública '/api/public/housingQualities' para evitar error 404
+  await adjuntarOpc.adjuntarNoValida(calidadesVivienda, "public/housingQualities");
 
   // Rellena automáticamente todo este gran formulario pidiendo al servidor los datos que la familia ya tenía guardados
   await cargarDatos(
@@ -102,18 +107,29 @@ export default async () => {
   botonGuardar.disabled = false;
   window.procesoPeticion = false;
 
+  // Inicializar validador automático (activa auto-capitalización en blur)
+  validacion.validadorAutomatico.init(form);
+
   // Acción principal que envía toda esta nueva información al servidor
   form.addEventListener("submit", async (e) => {
     e.preventDefault(); // Evitar la recarga violenta de la página web
     botonGuardar.disabled = true; // Bloquea el uso del botón
     window.procesoPeticion = true; // Marca en el sistema que se está procesando algo
 
+    // Ejecución del validador automático
+    const booleanValidacion = validacion.validadorAutomatico.validarTodo(form);
+    if (!booleanValidacion) {
+      window.procesoPeticion = false;
+      botonGuardar.disabled = false;
+      return;
+    }
+
     // Empacar todos los datos en una estructura ordenada lista para viajar al servidor
     const datosRegistro = {
-      last_names: apellidos.value,
-      address: dirrecion.value,
+      last_names: adjuntarOpc.capitalizar(apellidos.value.trim()),
+      address: adjuntarOpc.capitalizar(dirrecion.value.trim()),
       sector_id: sectores.value,
-      sector_name: sectorNombre.value,
+      sector_name: adjuntarOpc.capitalizar(sectorNombre.value.trim()),
       landline_phone: telefono.value,
       housing_quality_id: calidadesVivienda.value,
       // (Nota interna: Algunas propiedades como 'zone_id', 'city_id' y 'department_id'
@@ -138,9 +154,11 @@ export default async () => {
   // Comportamiento de dependencia: Cuando el usuario elige un nuevo Departamento de la lista,
   // el sistema automáticamente borra y rellena la lista de 'Ciudades' con aquellas que correspondan al departamento elegido.
   departamentos.addEventListener("change", async () => {
+    // MODIFICADO: Se añade el prefijo 'public/' a la ruta de ciudades por departamento para asegurar que la petición se enrute correctamente
+    // a través del PublicServlet público y no cause error de respuesta 404 no encontrada.
     await adjuntarOpc.adjuntarReseteoNoValida(
       ciudades,
-      `cities/department/${departamentos.value}`,
+      `public/cities/department/${departamentos.value}`,
     );
   });
 };

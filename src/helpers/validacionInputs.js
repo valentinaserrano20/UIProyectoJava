@@ -39,15 +39,25 @@ const mostrarError = (input, mensaje) => {
   span.className = "error";
   span.textContent = mensaje;
 
-  // Sube 1 nivel: input → div.input, e inserta el span DESPUÉS del input (debajo visualmente)
-  input.insertAdjacentElement("afterend", span);
+  // Si el input está dentro de un form__inputBox, insertamos la burbuja relativa a este
+  const targetElement = input.parentElement.classList.contains("form__inputBox")
+    ? input.parentElement
+    : input;
+
+  targetElement.insertAdjacentElement("afterend", span);
 };
 
-// Busca si hay un span ".error" hermano del input y lo destruye
+// Busca si hay un span ".error" hermano del target y lo destruye
 export const limpiarError = (input) => {
-  // El span.error es hermano del input (insertado con afterend), lo busca en el padre directo
-  const error = input.parentElement.querySelector(".error");
-  if (error) error.remove();
+  const targetElement = input.parentElement.classList.contains("form__inputBox")
+    ? input.parentElement
+    : input;
+
+  // Buscamos el span.error que sea hermano directo
+  const sibling = targetElement.nextElementSibling;
+  if (sibling && sibling.classList.contains("error")) {
+    sibling.remove();
+  }
 };
 
 
@@ -66,8 +76,12 @@ const error = (input, mensaje) => {
 // y *Tampoco* es una tecla especial de control, bloquea la acción evitando que se escriba en pantalla.
 const permitirTecla = (event, regex) => {
   if (
-    !regex.test(event.key) &&
-    !TECLAS_ESPECIALES.includes(event.key)
+    event.key &&
+    event.key.length === 1 &&
+    !event.ctrlKey &&
+    !event.metaKey &&
+    !event.altKey &&
+    !regex.test(event.key)
   ) {
     event.preventDefault(); // Anula silenciosamente el tecleo
   }
@@ -137,8 +151,8 @@ export const validar_password = (input) => {
   const reglas = [
     { test: /[A-Z]/, msg: "una mayúscula" },
     { test: /[a-z]/, msg: "una minúscula" },
-    { test: /\d/, msg: "un número" },
-    { test: /\W/, msg: "un carácter especial" },
+    { test: /[0-9]/, msg: "un número" },
+    { test: /[^A-Za-z0-9]/, msg: "un carácter especial" },
     { test: /.{8,}/, msg: "mínimo 8 caracteres" }
   ];
 
@@ -218,6 +232,7 @@ export const validar_select = (select) => {
 
   return true;
 };
+export const validarSelect = validar_select;
 
 // Combina función de mínimos y máximos simultáneamente
 export const validar_minimoMaximo = (input, minimo, maximo) => {
@@ -348,9 +363,48 @@ const inputTipos={
 
   passwordSinValdacion: {validacion:(input)=>validar_maximo(input),max:40},
 
-  mayorDeEdad:{validacion:(input)=>validar_minimoMaximo(input)}
+  mayorDeEdad:{validacion:(input)=>validar_mayoriaEdad(input)}
 };
 
+
+// =====================================================
+// AUTOMATIC CAPITALIZATION FOR PROPER NOUNS/TEXT FIELDS
+// =====================================================
+
+const capitalizarTexto = (texto) => {
+  if (!texto) return "";
+  return texto
+    .toLowerCase()
+    .split(" ")
+    .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+    .join(" ");
+};
+
+const fieldsToCapitalize = (input) => {
+  if (input.type !== "text") return false;
+  if (input.readOnly || input.disabled) return false;
+
+  const idLower = (input.id || "").toLowerCase();
+  const nameLower = (input.name || "").toLowerCase();
+  const tipoLower = (input.dataset.tipo || "").toLowerCase();
+
+  const isExcluded = 
+    idLower.includes("correo") || idLower.includes("email") ||
+    idLower.includes("contrase") || idLower.includes("pass") ||
+    idLower.includes("telefono") || idLower.includes("celular") ||
+    idLower.includes("documento") || idLower.includes("num") ||
+    idLower.includes("id") || idLower.includes("code") ||
+    nameLower.includes("correo") || nameLower.includes("email") ||
+    nameLower.includes("contrase") || nameLower.includes("pass") ||
+    nameLower.includes("telefono") || nameLower.includes("celular") ||
+    nameLower.includes("documento") || nameLower.includes("num") ||
+    nameLower.includes("id") || nameLower.includes("code") ||
+    tipoLower.includes("correo") || tipoLower.includes("password") ||
+    tipoLower.includes("telefono") || tipoLower.includes("documento") ||
+    tipoLower.includes("numerico");
+
+  return !isExcluded;
+};
 
 // =====================================================
 // EXPORTADOR DEL CONTROLADOR AUTOMÁTICO DE VALIDACIÓN 
@@ -365,6 +419,16 @@ export const validadorAutomatico = {
     const textArea = formulario.querySelectorAll("textArea");
 
     inputs.forEach(input => {
+      // Auto-capitalizar al perder el foco
+      if (fieldsToCapitalize(input)) {
+        input.addEventListener("blur", () => {
+          const val = input.value.trim();
+          if (val) {
+            input.value = capitalizarTexto(val);
+          }
+        });
+      }
+
       // Extrae la etiqueta `<input data-tipo="nombre_tipo">`
       const tipo = input.dataset.tipo 
       // Chequea si existe una regla bautizada con ese nombre en nuestro Diccionario arriba `inputTipos`
@@ -416,6 +480,12 @@ export const validadorAutomatico = {
 
     // Pasada 1: Revisa todos los inputs de texto/numéricos 
     inputs.forEach(input => {
+      if (fieldsToCapitalize(input)) {
+        const val = input.value.trim();
+        if (val) {
+          input.value = capitalizarTexto(val);
+        }
+      }
       const tipo = input.dataset.tipo
       
       if (tipo in inputTipos){        
@@ -424,20 +494,24 @@ export const validadorAutomatico = {
           validar_siExiste(input, Number(inputTipos[tipo].min))
           return // Salta la iteración en seco
         }
+        
+        let valido = true;
         // Si la regla posee ambos minino y máximo configurado en JSON, ejecuta la test combinada de tamaños
         if (inputTipos[tipo].min && inputTipos[tipo].max){
-          validar_minimoMaximo(input,inputTipos[tipo].min,inputTipos[tipo].max);
+          valido = validar_minimoMaximo(input,inputTipos[tipo].min,inputTipos[tipo].max);
         }
         // Sino comprueba si solo pide mínimo y lanza esa prueba
         else if (inputTipos[tipo].min){
-          validar_minimo(input,Number(inputTipos[tipo].min));
+          valido = validar_minimo(input,Number(inputTipos[tipo].min));
         }
         // Sino prueba si solo pidió máximo a secas
         else if (inputTipos[tipo].max){
-          validar_maximo(input,Number(inputTipos[tipo].max));
+          valido = validar_maximo(input,Number(inputTipos[tipo].max));
         }
         // Independientemente de la longitud, si tiene atada una función de validación compleja (ej: `correo`), la evalúa
-        if(inputTipos[tipo].validacion) inputTipos[tipo].validacion(input);
+        if(valido && inputTipos[tipo].validacion) {
+          inputTipos[tipo].validacion(input);
+        }
       }
     })
 
@@ -450,20 +524,24 @@ export const validadorAutomatico = {
           validar_siExiste(input, Number(inputTipos[tipo].min))
           return // Salta la iteración en seco
         }
+        
+        let valido = true;
         // Si la regla posee ambos minino y máximo configurado en JSON, ejecuta la test combinada de tamaños
         if (inputTipos[tipo].min && inputTipos[tipo].max){
-          validar_minimoMaximo(input,inputTipos[tipo].min,inputTipos[tipo].max);
+          valido = validar_minimoMaximo(input,inputTipos[tipo].min,inputTipos[tipo].max);
         }
         // Sino comprueba si solo pide mínimo y lanza esa prueba
         else if (inputTipos[tipo].min){
-          validar_minimo(input,Number(inputTipos[tipo].min));
+          valido = validar_minimo(input,Number(inputTipos[tipo].min));
         }
         // Sino prueba si solo pidió máximo a secas
         else if (inputTipos[tipo].max){
-          validar_maximo(input,Number(inputTipos[tipo].max));
+          valido = validar_maximo(input,Number(inputTipos[tipo].max));
         }
         // Independientemente de la longitud, si tiene atada una función de validación compleja (ej: `correo`), la evalúa
-        if(inputTipos[tipo].validacion) inputTipos[tipo].validacion(input);
+        if(valido && inputTipos[tipo].validacion) {
+          inputTipos[tipo].validacion(input);
+        }
       }
     })
 

@@ -1,6 +1,48 @@
-.error{
-  width: 100%;
-  color: var(--color-rojizo);
-  font-size: var(--tamano-mediano);
-  text-align: end;
+/* =====================================================
+   Burbuja de Error de Validación Flotante (error.css)
+   Aparece con animación elástica justo por encima del input.
+   ===================================================== */
+.error {
+  position: absolute;
+  bottom: calc(100% + 6px); /* Colocada arriba de la caja de texto */
+  left: 12px;
+  background-color: var(--color-rojizo, #dc3545);
+  color: #ffffff !important; /* Forzar color blanco para máxima visibilidad */
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--fuente-contenido, inherit);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+  z-index: 100;
+  pointer-events: none; /* Evita interferir con los clics en el input */
+  width: max-content;
+  max-width: 90%;
+  word-wrap: break-word;
+  box-sizing: border-box;
+  display: block;
+  animation: aparecerBurbuja 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Flechita apuntadora (abajo) */
+.error::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 15px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--color-rojizo, #dc3545) transparent transparent transparent;
+}
+
+/* Animación elástica moderna de aparición */
+@keyframes aparecerBurbuja {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

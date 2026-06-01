@@ -74,8 +74,8 @@ export default async () => {
         
         // Constructor JSON Mapper a DTO de Tabla "Members" Database Laravel Eloquent
         const datosRegistro = {
-            names: nombres.value,
-            last_names: apellidos.value,
+            names: adjuntarOpc.capitalizar(nombres.value.trim()),
+            last_names: adjuntarOpc.capitalizar(apellidos.value.trim()),
             birth_date: nacimiento.value,
             blood_group_id: grupoSanguineo.value,
             document_type_id: tipoDocumento.value,
@@ -83,7 +83,7 @@ export default async () => {
             nationality_id: nacionalidad.value,
             gender_id: genero.value,
             kinship_id: parentesco.value,
-            eps: eps.value,
+            eps: adjuntarOpc.capitalizar(eps.value.trim()),
             phone: celularPersonal.value,
         };
 

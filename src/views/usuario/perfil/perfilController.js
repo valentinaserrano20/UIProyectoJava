@@ -61,15 +61,25 @@ export default async () => {
         return;
     }
 
+    // Función para capitalizar nombres propios y catálogos (ej: "bucaramanga" -> "Bucaramanga")
+    const capitalizar = (texto) => {
+        if (!texto) return "";
+        return texto
+            .toLowerCase()
+            .split(" ")
+            .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+            .join(" ");
+    };
+
     // Inyectar datos físicos en las cajas de texto del HTML
-    nombres.value = datosPerfil.names || "";
-    apellidos.value = datosPerfil.last_names || "";
-    tipoDocumento.value = datosPerfil.document_type || "";
+    nombres.value = capitalizar(datosPerfil.names || "");
+    apellidos.value = capitalizar(datosPerfil.last_names || "");
+    tipoDocumento.value = capitalizar(datosPerfil.document_type || "");
     numeroDocumento.value = datosPerfil.document_number || "";
     fechaNacimiento.value = datosPerfil.birth_date || "";
-    genero.value = datosPerfil.gender || "";
-    seccional.value = datosPerfil.sectional || "";
-    organizacion.value = datosPerfil.organization || "";
+    genero.value = capitalizar(datosPerfil.gender || "");
+    seccional.value = capitalizar(datosPerfil.sectional || "");
+    organizacion.value = capitalizar(datosPerfil.organization || "");
     telefono.value = datosPerfil.phone || "";
     correo.value = datosPerfil.email || "";
 

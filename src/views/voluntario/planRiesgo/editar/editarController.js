@@ -149,8 +149,8 @@ export default async () => {
         // DTO Base Constructor
         const datosRegistro = {
             threat_type_id: amenazas.value,
-            description: descripcion.value,
-            location: ubicacion.value,
+            description: adjuntarOpc.capitalizarPrimeraLetra(descripcion.value),
+            location: adjuntarOpc.capitalizar(ubicacion.value.trim()),
             distance: distancia.value,
         };
 

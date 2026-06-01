@@ -55,40 +55,55 @@ export default async () => {
 
   // Escuchando inyección intencionada "Enter/Click submit"
   form.addEventListener("submit", async (e) => {
-    // Flag ON
-    window.procesoPeticion = true;
-
     // Congela evento default
     e.preventDefault();
 
-    // Solicita confirmación verbal visual antes de mandar POST puro (Previniendo miss-clicks severos)
-    const confirmacion = await alerta.alertaQuest("¿Seguro que quieres crear la cuenta?");
-    if (!confirmacion.isConfirmed) return; // Si dice cancelar/afuera asume early return
+    if (window.procesoPeticion) return;
 
-    // Validandos booleanos 
+    // 1. Validandos booleanos primero en cliente
     const booleanValidacion = validacion.validadorAutomatico.validarTodo(form);
 
     // Lógica especial que chequea los dos nodos de Password y que visualmente empate valor (Contraseñas idénticas)
-    const validacionContrasena = validacion.validar_igualdad(contrasena, confContrasena);
+    const validacionContrasena = validacion.validar_igualdad(confContrasena, contrasena);
 
-    // Si algún proceso falló (Regex o Identidad)
+    // Si algún proceso falló (Regex o Identidad), corta de inmediato sin pedir confirmación
     if (!booleanValidacion || !validacionContrasena) {
-      window.procesoPeticion = false // Abre exclusa de bugs
-      boton.disabled = false; // Suelta boton
-      return // Corta
+      return;
     }
+
+    // Bloquea interacción durante proceso de confirmación y envío
+    window.procesoPeticion = true;
+    boton.disabled = true;
+
+    // 2. Solicita confirmación verbal visual solo si los datos ya son válidos
+    const confirmacion = await alerta.alertaQuest("¿Seguro que quieres crear la cuenta?");
+    if (!confirmacion.isConfirmed) {
+      window.procesoPeticion = false; // Desbloquea
+      boton.disabled = false;
+      return; // Si dice cancelar/afuera asume early return
+    }
+
+    // Función para capitalizar nombres y apellidos al persistirlos
+    const capitalizar = (texto) => {
+      if (!texto) return "";
+      return texto
+        .toLowerCase()
+        .split(" ")
+        .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+        .join(" ");
+    };
 
     // Objeto JS armado meticulosamente referenciando los Models esperados Backend para Users
     const datosRegistro = {
-      names: nombres.value,
-      last_names: apellidos.value,
+      names: capitalizar(nombres.value.trim()),
+      last_names: capitalizar(apellidos.value.trim()),
       birth_date: nacimiento.value,  // ISO yyyy-mm-dd
       document_type_id: tipoDocumento.value,
       document_number: numDocumento.value,
       phone: telefono.value,
       gender_id: genero.value,
       organization_id: organizacion.value,
-      email: corrElectronico.value,
+      email: corrElectronico.value.trim(),
       password: contrasena.value,
     };
 

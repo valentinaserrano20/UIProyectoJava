@@ -6,6 +6,7 @@ input{
   display: flex;
   flex-direction: column;
   width: 100%;
+  position: relative;
 }
 
 .input--contenedor{
@@ -98,22 +99,7 @@ textarea:focus {
   border-color: var(--color-rojizo);
 }
 
-/* Mensaje de error que aparece debajo del input (inyectado por mostrarError en validacionInputs.js) */
-/* Es hijo directo del div.input, insertado con insertAdjacentElement("afterend") */
-span.error {
-  color: var(--color-rojizo);         /* Color rojo del sistema de diseño */
-  font-size: var(--tamano-pequeno);   /* Fuente pequeña para no ocupar mucho espacio */
-  font-family: var(--fuente-contenido);
-  margin-top: 2px;                    /* Pequeña separación visual del input */
-  display: block;                     /* Ocupa su propia línea (debajo del input) */
-  animation: aparecerError 0.2s ease; /* Micro-animación suave al aparecer */
-}
-
-/* Animación de entrada del mensaje de error (desliza suavemente desde arriba) */
-@keyframes aparecerError {
-  from { opacity: 0; transform: translateY(-4px); }
-  to   { opacity: 1; transform: translateY(0);    }
-}
+/* Los estilos del span.error (burbuja flotante) se encuentran modularizados en error.css */
 
 
 .form__inputBox--double > .form__inputBox {
@@ -184,4 +170,29 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     text-align: center;
     padding: 24px 0;
   }
+}
+
+/* Estilo deshabilitado para cajas de texto y selects (apariencia oscura/gris y de alta legibilidad) */
+.form__inputBox:has(select:disabled),
+.form__inputBox:has(input:disabled) {
+  background-color: #e9ecef !important; /* Gris de fondo distinguible */
+  border-color: #ced4da !important;     /* Borde bien marcado */
+  cursor: not-allowed;
+}
+
+.form__inputBox:has(select:disabled) select,
+.form__inputBox:has(input:disabled) input {
+  background-color: transparent !important;
+  color: #495057 !important;              /* Texto gris oscuro de alta visibilidad */
+  cursor: not-allowed;
+}
+
+.form__inputBox:has(select:disabled) i,
+.form__inputBox:has(input:disabled) i {
+  color: #6c757d !important;              /* Icono gris visible */
+}
+
+/* Capitalizar visualmente campos de nombres propios, direcciones, sectores, eps, mascotas, etc. */
+input[type="text"]:not(#correoElectronico):not(#correo):not(#email):not(#telefono):not(#telefonoFijo):not(#celularPersonal):not(#numeroDocumento):not(#documento):not(#documentoNumero):not(#cedula):not(#contrasena):not(#confirmarContrasena):not(#nuevaContraseña):not(#confirmarContraseña):not(#familiaId):not(#tipoFamilia):not([type="number"]):not([type="date"]):not([type="email"]) {
+  text-transform: capitalize;
 }

@@ -127,8 +127,8 @@ export default async () => {
       // JSON Constructor For Patch Payload Formater 
       const datosRegistro = {
         resource_id: recurso.value,
-        description: descripcion.value,
-        location: ubicacion.value,
+        description: adjuntarOpc.capitalizarPrimeraLetra(descripcion.value),
+        location: adjuntarOpc.capitalizar(ubicacion.value.trim()),
         distance: distancia.value, // number Format Metters Wait Db Type Casting Numeric Cast
         phone: telefono.value,
       };

@@ -134,8 +134,8 @@ export default async () => {
 
     // Contrato Constructor DB API PATCH/PUT Payload Array DTO
     const datosRegistro = {
-      names: nombres.value,
-      last_names: apellidos.value,
+      names: adjuntarOpc.capitalizar(nombres.value.trim()),
+      last_names: adjuntarOpc.capitalizar(apellidos.value.trim()),
       birth_date: nacimiento.value,
       blood_group_id: grupoSanguineo.value,
       document_type_id: tipoDocumento.value,
@@ -143,7 +143,7 @@ export default async () => {
       nationality_id: nacionalidad.value,
       gender_id: genero.value,
       kinship_id: parentesco.value,
-      eps: eps.value,
+      eps: adjuntarOpc.capitalizar(eps.value.trim()),
       // Bug here en codigo Base: Se esta llamando celular.value cuando Node de arriba es celularPersonal (Posible NullPtr Reference!). Dejado intacto por politica.
       phone: celularPersonal.value,
     };

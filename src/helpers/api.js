@@ -4,6 +4,9 @@ import * as spinner from "./spinner";
 // URL base de la API
 const url = "http://localhost:8080/DCPlanes/api";
 
+// URL de almacenamiento de archivos estáticos
+export const urlStorage = "http://localhost:8080/DCPlanes";
+
 // ==========================================
 // HELPERS INTERNOS
 // ==========================================
@@ -194,4 +197,8 @@ export const delet = async (endpoint) => {
   } finally {
     spinner.cerrarSpinner();
   }
+};
+
+export const getPdf = (endpoint) => {
+  window.open(`${url}/${endpoint}`, "_blank");
 };

@@ -48,19 +48,29 @@ export default async () => {
       return;
     }
 
+    // Función para capitalizar nombres propios (ej: "valentina serrano" -> "Valentina Serrano")
+    const capitalizar = (texto) => {
+      if (!texto) return "";
+      return texto
+        .toLowerCase()
+        .split(" ")
+        .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+        .join(" ");
+    };
+
     // Extracción de la identidad del voluntario desde el payload devuelto por Java
-    // Sirve para: Obtener el nombre completo del usuario y su identificador de género mapeado en la base de datos
-    // Qué hace: Realiza una desestructuración de las propiedades 'full_name' y 'gender_id' desde el objeto data
-    // Por qué es importante: Suministra los valores reales requeridos para personalizar el saludo inicial del dashboard de forma dinámica
-    const { full_name, gender_id } = data;
+    const names = data.names || "";
+    const lastNames = data.last_names || "";
+    const full_name = capitalizar(`${names} ${lastNames}`.trim());
+    const gender = data.gender ? data.gender.toLowerCase() : "";
 
     // =====================================================
     // CONSTRUIR SALUDO DINÁMICO
     // =====================================================
     let saludo = "Hola";
-    if (gender_id === 1) {
+    if (gender === "masculino") {
       saludo += "o"; // Voluntario
-    } else if (gender_id === 2) {
+    } else if (gender === "femenino") {
       saludo += "a"; // Voluntaria
     } else {
       saludo += " e"; // Inclusivo o no especificado

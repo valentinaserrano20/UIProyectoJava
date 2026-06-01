@@ -4,6 +4,23 @@
  */
 import * as api from "./api";
 
+// Función para capitalizar la primera letra de cada palabra
+export const capitalizar = (texto) => {
+  if (!texto) return "";
+  return texto
+    .toLowerCase()
+    .split(" ")
+    .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+    .join(" ");
+};
+
+// Función para capitalizar solo la primera letra del texto (Sentence Case)
+export const capitalizarPrimeraLetra = (texto) => {
+  if (!texto) return "";
+  const t = texto.trim();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+};
+
 // Carga un select HTML nativo trayendo del endpoint SOLAMENTE los registros activos (is_active == 1)
 // MODIFICADO: Agregada validación de nulidad para evitar crashes si la API falla o expira (ej: sesión cerrada)
 export const adjuntar = async (combox, endpoint) => {
@@ -13,7 +30,7 @@ export const adjuntar = async (combox, endpoint) => {
     if (dat.activo == 1) {
       const option = document.createElement("option");
       option.value = dat.id; // ID oculto de sistema
-      option.textContent = `${dat.nombre}`; // Label visual legible del usuario
+      option.textContent = capitalizar(dat.nombre); // Label visual legible capitalizado
       combox.appendChild(option);
     }
   });
@@ -26,7 +43,7 @@ export const adjuntarNoValida = async (combox, endpoint) => {
   datos.forEach((dat) => {
     const option = document.createElement("option");
     option.value = dat.id;
-    option.textContent = `${dat.nombre}`;
+    option.textContent = capitalizar(dat.nombre);
     combox.appendChild(option);
   });
 };
@@ -39,8 +56,9 @@ export const adjuntarInfo = async (combox, endpoint, infoDato) => {
     if (dat.activo == 1) {
       const option = document.createElement("option");
       option.value = dat.id;
-      // infoDato mapeará dinamicamente otro campo sumado al .nombre
-      option.textContent = `${dat[infoDato]} - ${dat.nombre}`;
+      // infoDato mapeará dinamicamente otro campo sumado al .nombre (sigla se deja en mayúscula)
+      const sigla = dat[infoDato] ? String(dat[infoDato]).toUpperCase() : "";
+      option.textContent = `${sigla} - ${capitalizar(dat.nombre)}`;
       combox.appendChild(option);
     }
   });
@@ -54,7 +72,7 @@ export const adjuntarDouble = async (combox, endpoint,input,infoDato) => {
     if (dat.activo  == 1) {
       const option = document.createElement("option");
       option.value = dat.id;
-      option.textContent = `${dat.nombre}`;
+      option.textContent = capitalizar(dat.nombre);
       combox.appendChild(option);
     }
   });
@@ -63,7 +81,7 @@ export const adjuntarDouble = async (combox, endpoint,input,infoDato) => {
     const seleccionado = combox.value;
     const seleccionadoInfo = datos.find((dat) => dat.id == seleccionado);
     if (seleccionadoInfo) {
-      input.value = seleccionadoInfo[infoDato]; // Rellena el input satélite con un dato derivado
+      input.value = capitalizar(seleccionadoInfo[infoDato]); // Rellena el input satélite capitalizado
       input.dispatchEvent(new Event("blur"));
     } else {
       input.value = "";
@@ -78,7 +96,7 @@ export const adjuntarMiembros = async (combox, endpoint) => {
   datos.forEach((dat) => {
     const option = document.createElement("option");
     option.value = dat.id;
-    option.textContent = `${dat.full_name} - ${dat.document_number}(${dat.kinship})`;
+    option.textContent = `${capitalizar(dat.full_name)} - ${dat.document_number} (${capitalizar(dat.kinship)})`;
     combox.appendChild(option);
   });
 };
@@ -90,7 +108,7 @@ export const adjuntarFactorRiesgo = async (combox, endpoint) => {
   datos.forEach((dat) => {
     const option = document.createElement("option");
     option.value = dat.id;
-    option.textContent = `${dat.threat_type_name} - ${dat.description}`;
+    option.textContent = `${capitalizar(dat.threat_type_name)} - ${capitalizar(dat.description)}`;
     combox.appendChild(option);
   });
 };
@@ -114,7 +132,7 @@ export const adjuntarReseteo = async (combox, endpoint) => {
     if (dat.activo == 1) {
       tom.addOption({
         value: dat.id,
-        text: dat.nombre
+        text: capitalizar(dat.nombre)
       });
     }
   });
@@ -140,7 +158,7 @@ export const adjuntarReseteoNoValida = async (combox, endpoint) => {
     datos.forEach((dat) => {
       tom.addOption({
         value: dat.id,
-        text: dat.nombre
+        text: capitalizar(dat.nombre)
       });
     });
 
@@ -149,13 +167,30 @@ export const adjuntarReseteoNoValida = async (combox, endpoint) => {
 
   } else {
     // 🔹 Si es un select HTML normal de caja fea 
+    
+    // Buscar si ya tiene una opción placeholder (oculta o vacía) para preservarla
+    let placeholderText = "";
+    const existingPlaceholder = combox.querySelector("option[hidden], option[value='']");
+    if (existingPlaceholder) {
+      placeholderText = existingPlaceholder.textContent;
+    }
+
     combox.options.length = 0; // Borra todos los hijos opción de rompetazo
     combox.disabled = false;
+
+    // Si había un placeholder, lo reinyectamos al principio de la lista
+    if (placeholderText) {
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.hidden = true;
+      placeholder.textContent = placeholderText;
+      combox.appendChild(placeholder);
+    }
 
     datos.forEach((dat) => {
       const option = document.createElement("option");
       option.value = dat.id;
-      option.textContent = dat.nombre;
+      option.textContent = capitalizar(dat.nombre);
       combox.appendChild(option);
     });
   }
