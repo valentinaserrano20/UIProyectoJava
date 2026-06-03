@@ -31,7 +31,8 @@ export default async () => {
   const id = location.hash.split("=")[1]; // Family ID Current Focus
   
   // Guardián Frontend: ¿El usuario que intenta entrar por URL es el dueño de este plan? ¿Tiene el estado correcto para modificarlo? Si no, lo patea.
-  await AccesoPlan(id); 
+  const tieneAcceso = await AccesoPlan(id); 
+  if (!tieneAcceso) return;
 
   // MODIFICADO: Declaración e inicialización de la variable base que faltaba en este controlador
   const esSupervisor = location.hash.includes("supervisor/");
@@ -39,15 +40,23 @@ export default async () => {
   
   // Fetch Cabecera Datos Básicos Flia 
   const planFamiliar = await api.get(`familyPlans/${id}`);
+  if (!planFamiliar) {
+    alerta.alertaError("No se pudo cargar la información del plan familiar.");
+    return;
+  }
 
   // Inyección Custom Title en Top Bar UI (Ej: Familia "Perez Rodriguez")
-  nombreFamilia.textContent += `${planFamiliar.last_names}`;
+  nombreFamilia.textContent += `${planFamiliar.last_names || ""}`;
 
-  
+  // Ocultar botón Enviar para supervisores, ya que la revisión y aprobación/rechazo se maneja desde su dashboard específico
+  if (esSupervisor) {
+    botonEnviar.classList.add("invisible");
+  }
 
   // Definir si existen miembros de la familia para realizar acciones en el menu -------------------------------------------------------------------------------...
   const tieneMiembros = await api.get(`familyPlans/has-members/${id}`);
-  console.log(tieneMiembros);
+  const hasMembers = tieneMiembros ? tieneMiembros.has_members : false;
+  console.log("Tiene integrantes:", hasMembers);
   
 
   // Router Volver al Muro General
@@ -84,7 +93,7 @@ export default async () => {
 
   factoresRiesgo.addEventListener("click", async () => {
     
-    if(!tieneMiembros.has_members){
+    if(!hasMembers){
       // console.log("No tiene miembros");
       alerta.alertaWarning(`El Plan de la Familia ${planFamiliar.last_names} no posee ningun integrante`);
       return;
@@ -140,10 +149,14 @@ export default async () => {
 
     if (confirmacion.isConfirmed) {
       try {
-        // Envio Endpoint Workflow. 
-        // 4 -> 'Enviado a Revisión (Ficha Completa)'. El supervisor ahora lo verá en su bandeja y al autor se le bloquea la app en modo Read-only a nivel backend.
+        // -------------------------------------------------------------
+        // ENVÍO DE PLAN AL ENDPOINT DE TRABAJO (PATCH CHANGE-STATUS)
+        // -------------------------------------------------------------
+        // Qué hace: Envía una petición de cambio de estado a la API pasando status_plan_id = 1.
+        // Por qué existe: Cambia el estado del plan familiar a 'Enviado' (1) en la base de datos para que el supervisor lo evalúe.
+        // Qué problema resuelve: Corrige el error por el cual el plan cambiaba a 'Rechazado' (ID 4) al enviarse.
         const data = await api.patch(`familyPlans/${id}/change-status`, {
-          status_plan_id: 4, 
+          status_plan_id: 1, 
         });
         if (data.success) {
           await alerta.alertaOK(data.message);

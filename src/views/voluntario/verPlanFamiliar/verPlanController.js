@@ -18,10 +18,13 @@ export default async () => {
   // encontrar contenedor donde van los filtros
   const contenedorFiltro = document.querySelector(".container__filtro");
 
-  // agregar campos de filtro
+  const searchBarFiltro = (event) => {
+    filtroBusqueda = event.target.value.trim();
+    renderPlanes();
+  };
 
   const searchbar = await searchBar(searchBarFiltro);
-  const dropdown = await dropdownFiltro();
+  const dropdown = await dropdownFiltro(true);
 
   contenedorFiltro.append(searchbar);
   contenedorFiltro.append(dropdown);
@@ -60,7 +63,20 @@ export default async () => {
     contenedor.innerHTML = "";
 
     const planesFiltrados = todosLosPlanes.filter((plan) => {
-      const pasaEstado = filtroEstado === 0 || plan.status_id == filtroEstado;
+      let pasaEstado = true;
+      if (filtroEstado !== 0) {
+        if (filtroEstado === 3) {
+          // 'Por definir' -> tipo_familia_id == 3 (no ha hecho el test)
+          pasaEstado = plan.family_type_id === 3;
+        } else if (filtroEstado === 2) {
+          // 'En revision' -> estado_id == 2 y tipo_familia_id !== 3 (test hecho, no enviado)
+          pasaEstado = plan.status_id === 2 && plan.family_type_id !== 3;
+        } else {
+          // Otros estados (Rechazado, Rechazado con observaciones)
+          pasaEstado = plan.status_id == filtroEstado;
+        }
+      }
+
       const pasaBusqueda =
         filtroBusqueda === "" ||
         plan.last_names.toLowerCase().includes(filtroBusqueda.toLowerCase());
@@ -83,13 +99,15 @@ export default async () => {
     // Recupera Data-Attr embutidos en el HTML al renderizar
     const planId = boton.dataset.id;
     const status = boton.dataset.status;
+    const familyTypeId = Number(boton.dataset.familyTypeId);
 
     // Router Inteligente de Permisos Segun el actor logueado:
-    if (rolId == 3) {
+    if (rolId == 1) {
       // Branch VOLUNTARIO (Autor)
 
-      // Si el estado es 1 (Nuevo/Recien creado), Obligale a pasar primero por el Test Psicológico de Vulnerabilidad.
-      if (status == 1) {
+      // Si el tipo de familia es 3 (Por Definir), significa que no ha realizado el test de vulnerabilidad.
+      // Si ya está definida como Vulnerable (1) o No Vulnerable (2), va directo al menú de módulos.
+      if (familyTypeId === 3) {
         location.href = `#/voluntario/plan_familiar/testVunerabilidad?id=${planId}`;
       } else {
         // Si ya pasó el test, llévalo al Menu Index Hub Modules
@@ -106,10 +124,5 @@ export default async () => {
     filtroEstado = Number(e.target.value);
     renderPlanes();
   });
-  function searchBarFiltro(event) {
-    filtroBusqueda = event.target.value.trim();
-    renderPlanes();
-  }
-
   cargarPlanes();
 };

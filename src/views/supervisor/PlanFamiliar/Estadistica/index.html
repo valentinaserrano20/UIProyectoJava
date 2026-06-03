@@ -1,9 +1,108 @@
-<div class="container">
-    <div class="explicacion">
-        <p class="explicacion__titulo">Estadisticas de los planes familiares</p>
-        <p class="explicacion__subtitulo">Estadisticas actuales sobre los estados de los planes familiares</p>
+<!--
+  Vista: Estadísticas de los Planes y del Sistema (index.html)
+  Esta vista incluye una barra lateral fija a la izquierda y una sección central a la derecha
+  donde se despliegan de manera combinada los gráficos de supervisión (planes familiares)
+  y los gráficos de administración (estados de usuarios, distribución de roles y tendencias).
+  Todos los estilos están declarados en clases CSS para cumplir las buenas prácticas.
+-->
+<div class="container container--noPadding dashboard-layout">
+    
+    <!-- BARRA LATERAL (Aside / Sidebar) -->
+    <aside class="sidebar sidebar--dashboard">
+        <div class="sidebar__lista">
+            <a href="#/supervisor/" class="sidebar__link" id="menuHome">
+                <i class="ri-gallery-view-2 icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Inicio</p>
+                </div>
+            </a>
+            <a href="#/supervisor/plan_familiar/" class="sidebar__link" id="menuPlanes">
+                <i class="ri-file-user-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Planes Familiares</p>
+                </div>
+            </a>
+            <a href="#/supervisor/usuarios/gestion" class="sidebar__link" id="menuVoluntarios">
+                <i class="ri-group-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Voluntarios</p>
+                </div>
+            </a>
+            <a href="#/supervisor/plan_familiar/estadistica" class="sidebar__link sidebar__link--active" id="menuEstadisticas">
+                <i class="ri-bar-chart-2-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Estadísticas</p>
+                </div>
+            </a>
+            <a href="#/supervisor/usuarios/peticiones" class="sidebar__link" id="menuPeticiones">
+                <i class="ri-arrow-left-right-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Peticiones</p>
+                </div>
+            </a>
+            <a href="#/administrador/datos_maestros" class="sidebar__link" id="menuDatosMaestros">
+                <i class="ri-database-2-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Datos Maestros</p>
+                </div>
+            </a>
+            
+            <a href="#/usuario/perfil" class="sidebar__link sidebar__link--perfil" id="menuPerfil">
+                <i class="ri-user-line icono__grande icono__grande--perfil"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto" id="nombreUsuarioSidebar">Cargando...</p>
+                    <p class="sidebar__info">Supervisor_Admin</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL (Estadísticas) -->
+    <div class="dashboard-content">
+        <div class="explicacion">
+            <h2 class="explicacion__titulo">Estadísticas Consolidadas</h2>
+            <p class="explicacion__subtitulo">Análisis y distribución de Planes Familiares y Cuentas del Sistema</p>
+        </div>
+
+        <!-- Sección de Gráficos Analíticos -->
+        <div class="dashboard-grid-charts">
+            
+            <!-- Tarjeta 1: Gráficos de Supervisor (Planes) -->
+            <div class="tarjeta dashboard-chart-card">
+                <h3 class="tarjeta__titulo">📊 Estados de Planes Familiares</h3>
+                <p class="form__texto form__texto--secundario">Proporción actual de planes Aprobados, Rechazados y Pendientes.</p>
+                <div class="dashboard-chart-container">
+                    <canvas id="estadosPlanFamiliar"></canvas>
+                </div>
+            </div>
+
+            <!-- Tarjeta 2: Gráficos de Administrador (Estados de Usuario) -->
+            <div class="tarjeta dashboard-chart-card">
+                <h3 class="tarjeta__titulo">👥 Estados de Cuentas de Usuario</h3>
+                <p class="form__texto form__texto--secundario">Balance entre cuentas Activas, Inactivas y Peticiones Pendientes.</p>
+                <div class="dashboard-chart-container">
+                    <canvas id="canvaEstadoUsuario"></canvas>
+                </div>
+            </div>
+
+            <!-- Tarjeta 3: Gráficos de Administrador (Distribución de Roles) -->
+            <div class="tarjeta dashboard-chart-card">
+                <h3 class="tarjeta__titulo">🛡️ Usuarios por Rol</h3>
+                <p class="form__texto form__texto--secundario">Proporción entre Voluntarios y Supervisores en el sistema.</p>
+                <div class="dashboard-chart-container">
+                    <canvas id="canvaRoles"></canvas>
+                </div>
+            </div>
+
+            <!-- Tarjeta 4: Gráficos de Administrador (Catálogo de Cambios) -->
+            <div class="tarjeta dashboard-chart-card">
+                <h3 class="tarjeta__titulo">📈 Tendencia de Cambios en Catálogos</h3>
+                <p class="form__texto form__texto--secundario">Cantidad mensual de adiciones/ediciones en datos maestros.</p>
+                <div class="dashboard-chart-container--wide">
+                    <canvas id="canvaCatalogoEstados"></canvas>
+                </div>
+            </div>
+
+        </div>
     </div>
-    <form class="form">
-        <canvas id="estadosPlanFamiliar"></canvas>
-    </form>
 </div>

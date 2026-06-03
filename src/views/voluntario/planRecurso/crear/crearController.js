@@ -42,7 +42,7 @@ export default async () => {
   const servicio = document.getElementById("servicio"); // Select Subtype
 
   // Magic Helper Doble Lista Enlazada Dinámica! (Actualiza selects hijos segun el padre)
-  await adjuntarOpc.adjuntarDouble(recurso, "resources",servicio,'service');
+  await adjuntarOpc.adjuntarDouble(recurso, "tiposRecurso",servicio,'service');
 
   /**
    * --- SECCIÓN LISTENER VALIDACIONES MANUALES EVENT DRIVEN "EN VIVO" ---
@@ -123,7 +123,7 @@ export default async () => {
       
       try {
         // Ejecutor Core PUSH DB Action (resource table inserts)
-        const data = await api.post(`availableResources`, datosRegistro); // URL Backend Action
+        const data = await api.post(`recursosDisponibles`, datosRegistro); // URL Backend Action
         
         if (data.success) {
           await alerta.alertaOK(data.message);

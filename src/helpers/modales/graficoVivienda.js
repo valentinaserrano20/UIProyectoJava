@@ -9,7 +9,7 @@ import * as alerta from "../alertas";
 // Función asíncrona para mostrar la imagen ampliada dado un ID de gráfico
 export const ver = async(id) => {
   // Dispara la petición a la API pidiendo los detalles del gráfico
-  const datos = await api.get(`housingGraphics/${id}`);
+  const datos = await api.get(`imagenes/vivienda/${id}`);
   
   // Construye un código HTML inyectando la ruta de la imagen (Combinando la URL base del Storage de la API con el path relativo)
   const htmlModal = `

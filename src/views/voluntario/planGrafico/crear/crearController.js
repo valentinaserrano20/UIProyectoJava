@@ -103,7 +103,7 @@ export default async () => {
 
     try {
       // API PUSH (POST NEW) sin checkear si existe porque este modulo PERMITE MUCHOS GRAFICOS/PLANOS !
-      const data = await api.postImagen(`housingGraphics`, formData);
+      const data = await api.postImagen(`imagenes/vivienda`, formData);
       if (data.success) {
         // Redirige Inmediato a Cuadricula Listado para ver su Insercion Exitosa Visualmente
         await alerta.alertaOK(data.message);

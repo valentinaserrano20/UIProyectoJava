@@ -303,7 +303,6 @@ const ocultarUrlFamilia = async (hash) => {
 
         if (
             plan.status_plan_id === 4 ||
-            plan.status_plan_id === 5 ||
             plan.status_plan_id === 6 ||
             plan.status_plan_id === 7
         ) {

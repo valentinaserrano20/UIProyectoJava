@@ -25,9 +25,9 @@ const RevisionPlanController = async () => {
 
     const pets = await api.get(`pets/`);
 
-    const riskFactors = await api.get(`riskFactors/`);
+    const riskFactors = await api.get(`factoresRiesgo/`);
 
-    const Resources = await api.get(`availableResources/familyPlan/${id}`) ?? [];
+    const Resources = await api.get(`recursosDisponibles/planFamiliar/${id}`) ?? [];
 
     const contenedor = document.querySelector(".container__revision");
 
@@ -253,7 +253,7 @@ const RevisionPlanController = async () => {
 
         contadorRiesgos++;
 
-        const tiposRiesgo = await api.get(`threatTypes/${factor.threat_type_id}`);
+        const tiposRiesgo = await api.get(`tiposAmenaza/${factor.threat_type_id}`);
 
         const factorCont = document.createElement("div");
         factorCont.classList.add("form_autorizacion");

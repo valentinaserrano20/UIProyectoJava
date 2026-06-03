@@ -51,7 +51,7 @@ export default async () => {
 
   // Trae de la base de datos a los integrantes y los factores de riego ya guardados para llenar las opciones a seleccionar
   await adjuntarOpc.adjuntarMiembros(miembro, `members/familyPlan/select/${id}`,);
-  await adjuntarOpc.adjuntarFactorRiesgo(factorRiesgo, `riskFactors/familyPlan/select/${id}`);
+  await adjuntarOpc.adjuntarFactorRiesgo(factorRiesgo, `factoresRiesgo/planFamiliar/seleccion/${id}`);
 
   // Eventos para quitar los contornos rojos de error que avisan cuando el usuario selecciona alguna opción de la lista
   miembro.addEventListener("change", () => {
@@ -93,6 +93,7 @@ export default async () => {
       const datosRegistro = {
         member_id: miembro.value,
         risk_factor_id: factorRiesgo.value,
+        family_plan_id: id,
       };
 
       // Ejecución de la comunicación con el servidor

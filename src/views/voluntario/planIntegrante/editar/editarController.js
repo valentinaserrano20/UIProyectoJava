@@ -10,6 +10,7 @@ import * as cargarDatos from "../../../../helpers/cargarDatos";
 import * as adjuntarOpc from "../../../../helpers/adjuntarOpciones";
 import * as modalIntegrante from "../../../../helpers/modales/integrante"; // Helper UI SweetAlert Complejo!
 import acordeon from "../../../../helpers/acordeon"; // Script Inyector Eventos Acordeon Toggle JS Vainilla
+import * as validacion from "../../../../helpers/validacionInputs";
 
 export default async () => {
   // Selectores UI Básicos Control
@@ -110,6 +111,9 @@ export default async () => {
   // Ejecutar carga de Enfermedades inicial
   cargarAfecciones();
 
+  // Inicializar validador automático
+  validacion.validadorAutomatico.init(form);
+
   window.procesoPeticion = false; // UX libre
   botonGuardar.disabled = false;
 
@@ -131,6 +135,21 @@ export default async () => {
     e.preventDefault();
     window.procesoPeticion = true;
     botonGuardar.disabled = true; // No btn se llama boton, error var? -> check below the error de 'boton' not exist vs botonGuardar. Use 'botonGuardar' directly
+
+    let booleanValidacion = validacion.validadorAutomatico.validarTodo(form);
+    if (booleanValidacion && parentesco.value == "1") {
+      const esMayor = validacion.validar_mayoriaEdad(nacimiento);
+      if (!esMayor) {
+        booleanValidacion = false;
+      }
+    }
+    if (!booleanValidacion) {
+      window.procesoPeticion = false;
+      botonGuardar.disabled = false;
+      return;
+    }
+
+    // Contrato Constructor DB API PATCH/PUT Payload Array DTO
 
     // Contrato Constructor DB API PATCH/PUT Payload Array DTO
     const datosRegistro = {

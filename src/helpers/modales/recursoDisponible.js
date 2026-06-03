@@ -10,7 +10,7 @@ import * as alerta from "../alertas";
 // Ventana exclusiva de información, sin rutinas de edición o deleción.
 export const ver = async (id) => {
   // Dispara el GET al API en el controlador availableResources 
-  const datos = await api.get(`availableResources/${id}`);
+  const datos = await api.get(`recursosDisponibles/${id}`);
 
   // Diseño HTML en flex grid para listar descriptores geográficos y descriptores clave
   const htmlModal = `

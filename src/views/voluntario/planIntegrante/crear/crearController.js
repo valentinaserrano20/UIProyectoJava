@@ -63,7 +63,13 @@ export default async () => {
         botonGuardar.disabled = true;
         
         // Ejecución Analizador de Nodos Helper validador. Chequea si todos los Select Y texts cumplen reglas sin programar 1x1.
-        const booleanValidacion = validacion.validadorAutomatico.validarTodo(form);
+        let booleanValidacion = validacion.validadorAutomatico.validarTodo(form);
+        if (booleanValidacion && parentesco.value == "1") {
+            const esMayor = validacion.validar_mayoriaEdad(nacimiento);
+            if (!esMayor) {
+                booleanValidacion = false;
+            }
+        }
         if (!booleanValidacion)
         {
             // Falla UI. Cortocitcuit exit.

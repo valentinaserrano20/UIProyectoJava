@@ -1,132 +1,209 @@
-<div class="container">
-    <section class="explicacion">
-        <p class="explicacion__titulo">Hola, Supervisor</p>
-        <p class="explicacion__subtitulo">Bienvenido al panel de Control</p>
-    </section>
+<!--
+  Vista: Inicio Supervisor / Administrador Unificado (index.html)
+  Esta vista implementa una barra lateral flotante fija a la izquierda
+  y el contenido principal estructurado a la derecha.
+  Las métricas de planes y usuarios se despliegan en paralelo a igual altura
+  utilizando el mismo diseño de tarjetas del diseño original.
+-->
+<div class="container container--noPadding dashboard-layout">
+    
+    <!-- BARRA LATERAL (Aside / Sidebar) -->
+    <aside class="sidebar sidebar--dashboard">
+        <div class="sidebar__lista">
+            <a href="#/supervisor/" class="sidebar__link sidebar__link--active" id="menuHome">
+                <i class="ri-gallery-view-2 icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Inicio</p>
+                </div>
+            </a>
+            <a href="#/supervisor/plan_familiar/" class="sidebar__link" id="menuPlanes">
+                <i class="ri-file-user-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Planes Familiares</p>
+                </div>
+            </a>
+            <a href="#/supervisor/usuarios/gestion" class="sidebar__link" id="menuVoluntarios">
+                <i class="ri-group-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Voluntarios</p>
+                </div>
+            </a>
+            <a href="#/supervisor/plan_familiar/estadistica" class="sidebar__link" id="menuEstadisticas">
+                <i class="ri-bar-chart-2-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Estadísticas</p>
+                </div>
+            </a>
+            <a href="#/supervisor/usuarios/peticiones" class="sidebar__link" id="menuPeticiones">
+                <i class="ri-arrow-left-right-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Peticiones</p>
+                </div>
+            </a>
+            <a href="#/administrador/datos_maestros" class="sidebar__link" id="menuDatosMaestros">
+                <i class="ri-database-2-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Datos Maestros</p>
+                </div>
+            </a>
+            
+            <a href="#/usuario/perfil" class="sidebar__link sidebar__link--perfil" id="menuPerfil">
+                <i class="ri-user-line icono__grande icono__grande--perfil"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto" id="nombreUsuarioSidebar">Cargando...</p>
+                    <p class="sidebar__info">Supervisor_Admin</p>
+                </div>
+            </a>
+        </div>
+    </aside>
 
-    <h3 class="tarjeta__titulo tarjeta__titulo--left">Estado General</h3>
-    <section class="seccion seccion--estado">
-        <article class="seccion__tarjeta seccion__tarjeta--azul">
-            <i class="ri-file-2-line icono__tarjeta"></i>
-            <div class="seccion__tarjeta-contenido">
-                <p class="tarjeta__header-texto">Planes Recibidos</p>
-                <span id="planesRecibidos" class="seccion__valor">0</span>
-                <p class="seccion__detalle">Nuevos</p>
-            </div>
-        </article>
-        <article class="seccion__tarjeta seccion__tarjeta--amarillo">
-            <i class="ri-time-line icono__tarjeta"></i>
-            <div class="seccion__tarjeta-contenido">
-                <p class="tarjeta__header-texto">Planes Recibidos</p>
-                <span id="planesEnRevision" class="seccion__valor">0</span>
-                <p class="seccion__detalle">En revisión</p>
-            </div>
-        </article>
-        <article class="seccion__tarjeta seccion__tarjeta--verde">
-            <i class="ri-checkbox-circle-line icono__tarjeta"></i>
-            <div class="seccion__tarjeta-contenido">
-                <p class="tarjeta__header-texto">Planes Recibidos</p>
-                <span id="planesAprobados" class="seccion__valor">0</span>
-                <p class="seccion__detalle">Aprobados</p>
-            </div>
-        </article>
-        <article class="seccion__tarjeta seccion__tarjeta--rojo">
-            <i class="ri-close-circle-line icono__tarjeta"></i>
-            <div class="seccion__tarjeta-contenido">
-                <p class="tarjeta__header-texto">Planes Recibidos</p>
-                <span id="planesRechazados" class="seccion__valor">0</span>
-                <p class="seccion__detalle">Rechazados</p>
-            </div>
-        </article>
-    </section>
+    <!-- CONTENIDO PRINCIPAL (Dashboard) -->
+    <div class="dashboard-content">
+        <!-- Encabezado con saludo dinámico según el perfil -->
+        <section class="explicacion">
+            <p class="explicacion__titulo">Hola, </p>
+            <p class="explicacion__subtitulo">Bienvenido al panel de Control Unificado</p>
+        </section>
 
-    <h3 class="tarjeta__titulo tarjeta__titulo--left">Últimos planes recibidos</h3>
-    <section class="lista lista--planes">
-        <article class="tarjeta tarjeta--fila tarjeta--plan">
-            <i class="ri-team-line icono__tarjeta tarjeta__icono tarjeta__icono--azul"></i>
-            <div class="tarjeta__contenido tarjeta__contenido--linea">
-                <p class="tarjeta__titulo tarjeta__titulo--pequeno">Familia Kennedy</p>
-                <p class="form__texto form__texto--secundario">Bucaramanga · 30/10/25</p>
-                <p class="form__texto form__texto--secundario">Voluntario: Juan Gomez</p>
-            </div>
-            <span class="tarjeta__estado tarjeta__estado--naranja">Pendiente</span>
-        </article>
-        <article class="tarjeta tarjeta--fila tarjeta--plan">
-            <i class="ri-team-line icono__tarjeta tarjeta__icono tarjeta__icono--azul"></i>
-            <div class="tarjeta__contenido tarjeta__contenido--linea">
-                <p class="tarjeta__titulo tarjeta__titulo--pequeno">Familia Rodríguez</p>
-                <p class="form__texto form__texto--secundario">Bucaramanga · 10/02/26</p>
-                <p class="form__texto form__texto--secundario">Voluntario: S. Díaz</p>
-            </div>
-            <span class="tarjeta__estado tarjeta__estado--naranja">Pendiente</span>
-        </article>
-        <article class="tarjeta tarjeta--fila tarjeta--plan">
-            <i class="ri-team-line icono__tarjeta tarjeta__icono tarjeta__icono--azul"></i>
-            <div class="tarjeta__contenido tarjeta__contenido--linea">
-                <p class="tarjeta__titulo tarjeta__titulo--pequeno">Familia Rodríguez</p>
-                <p class="form__texto form__texto--secundario">Bucaramanga · 10/02/26</p>
-                <p class="form__texto form__texto--secundario">Voluntario: S. Díaz</p>
-            </div>
-            <span class="tarjeta__estado tarjeta__estado--naranja">Pendiente</span>
-        </article>
-    </section>
-    <table class="tabla tabla--supervisor">
-        <thead class="tabla__header">
-            <tr class="tabla__fila tabla__fila--header">
-                <th class="tabla__celda tabla__celda--titulo">Familia</th>
-                <th class="tabla__celda tabla__celda--titulo">Organización</th>
-                <th class="tabla__celda tabla__celda--titulo">Fecha</th>
-                <th class="tabla__celda tabla__celda--titulo">Voluntario</th>
-            </tr>
-        </thead>
-        <tbody class="tabla__contenido">
-            <tr class="tabla__fila">
-                <td class="tabla__celda">
-                        <i class="ri-team-line tabla__icono"></i>
-                        <span>Quintero Díaz</span>
-                </td>
-                <td class="tabla__celda">Bucaramanga</td>
-                <td class="tabla__celda">20/04/2026</td>
-                <td class="tabla__celda">Jhon Díaz</td>
-            </tr>
-            <tr class="tabla__fila">
-                <td class="tabla__celda">
-                        <i class="ri-team-line tabla__icono"></i>
-                        <span>Quintero Díaz</span>
-                </td>
-                <td class="tabla__celda">Bucaramanga</td>
-                <td class="tabla__celda">20/04/2026</td>
-                <td class="tabla__celda">Jhon Díaz</td>
-            </tr>
-            <tr class="tabla__fila">
-                <td class="tabla__celda">
-                        <i class="ri-team-line tabla__icono"></i>
-                        <span>Quintero Díaz</span>
-                </td>
-                <td class="tabla__celda">Bucaramanga</td>
-                <td class="tabla__celda">20/04/2026</td>
-                <td class="tabla__celda">Jhon Díaz</td>
-            </tr>
-        </tbody>
-    </table>
+        <!-- SECCIÓN DE MÉTRICAS UNIFICADAS (Planes y Usuarios lado a lado) -->
+        <div class="dashboard-metrics-wrapper">
+            
+            <!-- Columna Izquierda: Estado de Planes -->
+            <div class="dashboard-metrics-column">
+                <h3 class="tarjeta__titulo tarjeta__titulo--left">Estado de Planes Familiares</h3>
+                <div class="dashboard-metrics-grid">
+                    <!-- Tarjeta: Pendientes -->
+                    <article class="seccion__tarjeta seccion__tarjeta--azul">
+                        <i class="ri-file-2-line icono__tarjeta"></i>
+                        <div class="seccion__tarjeta-contenido">
+                            <p class="tarjeta__header-texto">Planes Recibidos</p>
+                            <span id="planesRecibidos" class="seccion__valor">0</span>
+                            <p class="seccion__detalle">Pendientes</p>
+                        </div>
+                    </article>
 
-    <h3 class="tarjeta__titulo tarjeta__titulo--left">Accesos Rápidos</h3>
-    <section class="seccion">
-        <article class="seccion__tarjeta seccion__tarjeta--azul" id="planFamiliar">
-            <i class="ri-file-list-3-line icono__tarjeta"></i>
-            <p class="seccion__detalle">Planes Familiares</p>
-        </article>
-        <article class="seccion__tarjeta seccion__tarjeta--verde" id="voluntarios">
-            <i class="ri-team-line icono__tarjeta"></i>
-            <p class="seccion__detalle">Voluntarios</p>
-        </article>
-        <article class="seccion__tarjeta seccion__tarjeta--naranja" id="estadisticas">
-            <i class="ri-bar-chart-box-line icono__tarjeta"></i>
-            <p class="seccion__detalle">Estadísticas</p>
-        </article>
-        <article class="seccion__tarjeta seccion__tarjeta--naranja" id="peticiones">
-            <i class="ri-git-pull-request-line icono__tarjeta"></i>
-            <p class="seccion__detalle">Peticiones</p>
-        </article>
-    </section>
+                    <!-- Tarjeta: En revisión -->
+                    <article class="seccion__tarjeta seccion__tarjeta--amarillo">
+                        <i class="ri-time-line icono__tarjeta"></i>
+                        <div class="seccion__tarjeta-contenido">
+                            <p class="tarjeta__header-texto">Planes Recibidos</p>
+                            <span id="planesEnRevision" class="seccion__valor">0</span>
+                            <p class="seccion__detalle">En revisión</p>
+                        </div>
+                    </article>
+
+                    <!-- Tarjeta: Aprobados -->
+                    <article class="seccion__tarjeta seccion__tarjeta--verde">
+                        <i class="ri-checkbox-circle-line icono__tarjeta"></i>
+                        <div class="seccion__tarjeta-contenido">
+                            <p class="tarjeta__header-texto">Planes Recibidos</p>
+                            <span id="planesAprobados" class="seccion__valor">0</span>
+                            <p class="seccion__detalle">Aprobados</p>
+                        </div>
+                    </article>
+
+                    <!-- Tarjeta: Rechazados -->
+                    <article class="seccion__tarjeta seccion__tarjeta--rojo">
+                        <i class="ri-close-circle-line icono__tarjeta"></i>
+                        <div class="seccion__tarjeta-contenido">
+                            <p class="tarjeta__header-texto">Planes Recibidos</p>
+                            <span id="planesRechazados" class="seccion__valor">0</span>
+                            <p class="seccion__detalle">Rechazados</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Columna Derecha: Estado de Usuarios -->
+            <div class="dashboard-metrics-column">
+                <h3 class="tarjeta__titulo tarjeta__titulo--left">Estado de Usuarios del Sistema</h3>
+                <div class="dashboard-metrics-grid">
+                    <!-- Tarjeta: Total Registrados -->
+                    <article class="seccion__tarjeta seccion__tarjeta--naranja">
+                        <i class="ri-group-line icono__tarjeta"></i>
+                        <div class="seccion__tarjeta-contenido">
+                            <p class="tarjeta__header-texto">Usuarios Sistema</p>
+                            <span id="totalUsuarios" class="seccion__valor">0</span>
+                            <p class="seccion__detalle">Total Registrados</p>
+                        </div>
+                    </article>
+
+                    <!-- Tarjeta: Activos -->
+                    <article class="seccion__tarjeta seccion__tarjeta--verde">
+                        <i class="ri-checkbox-circle-line icono__tarjeta"></i>
+                        <div class="seccion__tarjeta-contenido">
+                            <p class="tarjeta__header-texto">Usuarios Sistema</p>
+                            <span id="activos" class="seccion__valor">0</span>
+                            <p class="seccion__detalle">Activos</p>
+                        </div>
+                    </article>
+
+                    <!-- Tarjeta: Inactivos -->
+                    <article class="seccion__tarjeta seccion__tarjeta--rojo">
+                        <i class="ri-close-circle-line icono__tarjeta"></i>
+                        <div class="seccion__tarjeta-contenido">
+                            <p class="tarjeta__header-texto">Usuarios Sistema</p>
+                            <span id="inactivos" class="seccion__valor">0</span>
+                            <p class="seccion__detalle">Inactivos</p>
+                        </div>
+                    </article>
+
+                    <!-- Tarjeta: Voluntarios -->
+                    <article class="seccion__tarjeta seccion__tarjeta--azul">
+                        <i class="ri-user-community-line icono__tarjeta"></i>
+                        <div class="seccion__tarjeta-contenido">
+                            <p class="tarjeta__header-texto">Usuarios Sistema</p>
+                            <span id="voluntarios" class="seccion__valor">0</span>
+                            <p class="seccion__detalle">Voluntarios</p>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Panel de Auditorías en Grid de dos columnas -->
+        <h3 class="tarjeta__titulo tarjeta__titulo--left">Auditoría del Sistema (Cambios de Usuarios y Catálogos)</h3>
+        <div class="dashboard-grid-audits">
+            <!-- Historial de cambios en usuarios (Auditoría) -->
+            <div class="dashBoard__container dashboard-audit-container">
+                <div class="ventanaHistorial w-100">
+                    <div class="ventanaHistorial__titulo">Historial cambios en usuarios</div>
+                    <div id="usuariosHistorial" class="ventanaHistorial__contenido dashboard-audit-scroll"></div>
+                </div>
+            </div>
+
+            <!-- Historial de cambios en Datos Maestros (Auditoría) -->
+            <div class="dashBoard__container dashboard-audit-container">
+                <div class="ventanaHistorial w-100">
+                    <div class="ventanaHistorial__titulo"> ● HISTORIAL DE CAMBIOS EN DATOS MAESTROS</div>
+                    <div id="catalogoHistorial" class="ventanaHistorial__contenido dashboard-audit-scroll"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de los últimos planes familiares recibidos -->
+        <h3 class="tarjeta__titulo tarjeta__titulo--left mt-10">Últimos planes recibidos</h3>
+        
+        <!-- Renderizado dinámico móvil -->
+        <section class="lista lista--planes w-100" id="listaPlanesMovil">
+            <!-- Se inyecta por JS -->
+        </section>
+
+        <!-- Renderizado dinámico de escritorio (Tabla) -->
+        <table class="tabla tabla--supervisor w-100" id="tablaPlanesDesktop">
+            <thead class="tabla__header">
+                <tr class="tabla__fila tabla__fila--header">
+                    <th class="tabla__celda tabla__celda--titulo">Familia</th>
+                    <th class="tabla__celda tabla__celda--titulo">Organización</th>
+                    <th class="tabla__celda tabla__celda--titulo">Fecha</th>
+                    <th class="tabla__celda tabla__celda--titulo">Voluntario</th>
+                    <th class="tabla__celda tabla__celda--titulo">Estado</th>
+                </tr>
+            </thead>
+            <tbody class="tabla__contenido" id="listaPlanesCuerpo">
+                <!-- Se inyecta por JS -->
+            </tbody>
+        </table>
+    </div>
 </div>

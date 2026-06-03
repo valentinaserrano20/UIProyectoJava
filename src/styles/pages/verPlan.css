@@ -69,8 +69,8 @@
 }
 
 .verPlan__tipo--gris {
-  background-color: var(--color-gris-25);
-  color: var(--grisMedio);
+  background-color: var(--color-fondogristranslucido);
+  color: var(--color-grisOscuro);
 }
 
 .verPlan__tipo--estado {

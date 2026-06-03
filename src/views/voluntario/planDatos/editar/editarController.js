@@ -66,6 +66,19 @@ export default async () => {
   // MODIFICADO: Llamada al catálogo de calidades de vivienda a través de la ruta pública '/api/public/housingQualities' para evitar error 404
   await adjuntarOpc.adjuntarNoValida(calidadesVivienda, "public/housingQualities");
 
+  // Auto-seleccionar "Santander" (ID 1) y deshabilitarlo ya que es el único departamento disponible
+  departamentos.value = "1";
+  departamentos.disabled = true;
+
+  // Cambiar la etiqueta visual para indicar explícitamente el nombre del campo
+  const opcionSantander = departamentos.querySelector('option[value="1"]');
+  if (opcionSantander) {
+    opcionSantander.textContent = "Departamento: Santander";
+  }
+
+  // Habilitar el selector de ciudades una vez cargados los catálogos
+  ciudades.disabled = false;
+
   // Rellena automáticamente todo este gran formulario pidiendo al servidor los datos que la familia ya tenía guardados
   await cargarDatos(
     `familyPlans/${id}`,
@@ -86,7 +99,6 @@ export default async () => {
       "id",
       "family_type",
       "last_names",
-      "family_type",
       "zone_id",
       "department_id",
       "city_id",
@@ -141,6 +153,11 @@ export default async () => {
       const data = await api.patch(`familyPlans/${id}/identify`, datosRegistro);
       if (data.success) {
         await alerta.alertaOK(data.message); // Muestra barra verde confirmando que los datos se guardaron
+        if (esSupervisor) {
+          location.href = `#/supervisor/plan_familiar/revision?familia_id=${id}`;
+        } else {
+          location.href = `#/voluntario/plan_familiar/familia?id=${id}`;
+        }
       } else alerta.alertaWarning(data.message, data.errors);
     } catch (error) {
       alerta.alertaError(error.errors); // Muestra el mensaje si la conexión falló

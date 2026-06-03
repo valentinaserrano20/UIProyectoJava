@@ -363,7 +363,18 @@ const inputTipos={
 
   passwordSinValdacion: {validacion:(input)=>validar_maximo(input),max:40},
 
-  mayorDeEdad:{validacion:(input)=>validar_mayoriaEdad(input)}
+  mayorDeEdad:{validacion:(input)=>validar_mayoriaEdad(input)},
+
+  fecha:{
+    validacion:(input)=>{
+      limpiarError(input);
+      if (!input.value) return error(input, "La fecha de nacimiento es obligatoria.");
+      const fechaSel = new Date(input.value);
+      const hoy = new Date();
+      if (fechaSel > hoy) return error(input, "La fecha de nacimiento no puede ser futura.");
+      return true;
+    }
+  }
 };
 
 

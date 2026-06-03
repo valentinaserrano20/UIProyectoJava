@@ -71,7 +71,7 @@ export default async () => {
      */
     const recargarContainer = async () => {
         contenedor.innerHTML = ""; // Limpiar Virtual DOM Container
-        await paginacion(`availableResources/familyPlan/${id}`, mensajeVacio, carta);
+        await paginacion(`recursosDisponibles/planFamiliar/${id}`, mensajeVacio, carta);
     };
 
     // DELEGADOR GLOBAL Eventos Botones Tarjetas (Optimización Performance N-1)
@@ -98,7 +98,7 @@ export default async () => {
             if (!confirmacion.isConfirmed) return;
 
             // Exec HTTP DELETE
-            const eliminado = await api.delet(`availableResources/${resourceId}`);
+            const eliminado = await api.delet(`recursosDisponibles/${resourceId}`);
 
             if (eliminado.success) {
                 await alerta.alertaOK(eliminado.message);

@@ -11,9 +11,9 @@ import * as alerta from "../alertas";
 export const ver = async (id) => {
 
     // 1. Invoca llamadas GET para centralizar info relacionada
-    const datos = await api.get(`riskFactors/${id}`);
-    const acciones = await api.get(`riskReductionActions/riskFactor/${id}`);
-    const vulnerabilidades = await api.get(`vulnerabilityFactors/riskFactor/${id}`);
+    const datos = await api.get(`factoresRiesgo/${id}`);
+    const acciones = await api.get(`accionesReduccion/factorRiesgo/${id}`);
+    const vulnerabilidades = await api.get(`factoresVulnerabilidad/factorRiesgo/${id}`);
     
     // Contenedores textuales iterables
     let todasAcciones = "";
@@ -141,7 +141,7 @@ export const crearAccion = async (riskFactorId, familyPlanId, recargarContainer)
 
         try {
             // Emite por POST
-            const data = await api.post("riskReductionActions", datos);
+            const data = await api.post("accionesReduccion", datos);
 
             // Validaciones API (success flag)
             if (data.success) {
@@ -165,7 +165,7 @@ export const crearAccion = async (riskFactorId, familyPlanId, recargarContainer)
 // Sub-Controlador: Lee en modal una acción de riesgo, pero con habilitación CRUD (Edita y Borra hijo)
 export const verEditarEliminarAccion = async (id, familyPlanId, recargarContainer, esSupervisor) => {
 
-    const datos = await api.get(`riskReductionActions/${id}`);
+    const datos = await api.get(`accionesReduccion/${id}`);
     
     // Estructura de vista default (lectura)
     const htmlModal = `
@@ -249,7 +249,7 @@ export const verEditarEliminarAccion = async (id, familyPlanId, recargarContaine
 
             try {
                 // Notese el uso de "PATCH" para edición parcial
-                const response = await api.patch(`riskReductionActions/${id}`, dataUpdate);
+                const response = await api.patch(`accionesReduccion/${id}`, dataUpdate);
 
                 if (response.success) {
                     await alerta.alertaOK(response.message);
@@ -279,7 +279,7 @@ export const verEditarEliminarAccion = async (id, familyPlanId, recargarContaine
         if (!confirmacion.isConfirmed) return; // Rompe si "Cancelar"
 
         // Eliminación física
-        const eliminado = await api.delet(`riskReductionActions/${id}`);
+        const eliminado = await api.delet(`accionesReduccion/${id}`);
 
         if (eliminado.success) {
             await alerta.alertaOK(eliminado.message);
@@ -296,8 +296,8 @@ export const verEditarEliminarAccion = async (id, familyPlanId, recargarContaine
 export const crearVulnerabilidad = async (riskFactorId, recargarContainer) => {
 
     // 🔹 Traer selects dependientes para llenar el dropdown
-    const vulnerabilityGrades = await api.get("vulnerabilityGrades");
-    const vulnerabilities = await api.get("vulnerabilities");
+    const vulnerabilityGrades = await api.get("gradosVulnerabilidad");
+    const vulnerabilities = await api.get("vulnerabilidades");
 
     let optionsGrades = "";
     vulnerabilityGrades.forEach(item => {
@@ -343,7 +343,7 @@ export const crearVulnerabilidad = async (riskFactorId, recargarContainer) => {
         };
 
         try {
-            const response = await api.post("vulnerabilityFactors", datos);
+            const response = await api.post("factoresVulnerabilidad", datos);
 
             if (response.success) {
                 await alerta.alertaOK(response.message);
@@ -364,7 +364,7 @@ export const crearVulnerabilidad = async (riskFactorId, recargarContainer) => {
 // Modal de lectura simple pero equiparado con la capacidad de borrado de dicha vulnerabilidad detectada
 export const verEditarEliminarVulnerabilidad = async (id, recargarContainer, esSupervisor) => {
 
-    const datos = await api.get(`vulnerabilityFactors/${id}`);
+    const datos = await api.get(`factoresVulnerabilidad/${id}`);
 
     const htmlModal = `
     <div class="modalVer modal">
@@ -387,8 +387,8 @@ export const verEditarEliminarVulnerabilidad = async (id, recargarContainer, esS
     // ✏ EDITAR (Nuevos Selects pre-seleccionados)
     const funcionModalEditar = async () => {
 
-        const vulnerabilityGrades = await api.get("vulnerabilityGrades");
-        const vulnerabilities = await api.get("vulnerabilities");
+        const vulnerabilityGrades = await api.get("gradosVulnerabilidad");
+        const vulnerabilities = await api.get("vulnerabilidades");
 
         let optionsGrades = "";
         vulnerabilityGrades.forEach(item => {
@@ -441,7 +441,7 @@ export const verEditarEliminarVulnerabilidad = async (id, recargarContainer, esS
 
             try {
                 // Pide actualización en el backend (PATCH)
-                const response = await api.patch(`vulnerabilityFactors/${id}`, dataUpdate);
+                const response = await api.patch(`factoresVulnerabilidad/${id}`, dataUpdate);
 
                 if (response.success) {
                     await alerta.alertaOK(response.message);
@@ -469,7 +469,7 @@ export const verEditarEliminarVulnerabilidad = async (id, recargarContainer, esS
 
         if (!confirmacion.isConfirmed) return;
 
-        const eliminado = await api.delet(`vulnerabilityFactors/${id}`);
+        const eliminado = await api.delet(`factoresVulnerabilidad/${id}`);
 
         if (eliminado.success) {
             await alerta.alertaOK(eliminado.message);

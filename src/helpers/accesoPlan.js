@@ -22,5 +22,7 @@ export default async (id) => {
         } else {
             location.replace(`#/voluntario/plan_familiar`);
         }
+        return false;
     }
+    return true;
 }

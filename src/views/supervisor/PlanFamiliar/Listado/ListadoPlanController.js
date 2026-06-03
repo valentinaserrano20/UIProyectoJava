@@ -17,6 +17,18 @@ const ListadoPlanController = async () => {
 
     const botonBack = document.getElementById("botonBack");
 
+    // -------------------------------------------------------------
+    // BLOQUE DE PERFIL EN SIDEBAR
+    // -------------------------------------------------------------
+    // Qué hace: Obtiene el nombre completo del usuario de sesión de localStorage y lo asigna a la sidebar.
+    // Por qué existe: Asegura la consistencia del menú lateral mostrando la identidad del usuario logueado.
+    // Qué problema resuelve: Identifica al usuario que realiza la consulta de planes en la barra lateral.
+    const nombre = localStorage.getItem("full_name");
+    const labelNombre = document.getElementById("nombreUsuarioSidebar");
+    if (labelNombre && nombre) {
+        labelNombre.textContent = nombre;
+    }
+
     const contenedor = document.querySelector(".container__paginas");
 
     const selectStatusCont = document.createElement("div");
@@ -131,13 +143,19 @@ const ListadoPlanController = async () => {
         const estadoTipoCont = document.createElement("div");
         estadoTipoCont.classList.add("verPlan__tipo--estado");
 
+        // -------------------------------------------------------------
+        // ASIGNACIÓN DE COLOR AL BADGE DE ESTADO DEL PLAN
+        // -------------------------------------------------------------
+        // Qué hace: Determina la clase CSS de color según el ID de estado del plan.
+        // Por qué existe: Mapea los códigos reales de la BD a colores coherentes en el listado de supervisor.
+        // Qué problema resuelve: Corrige la inconsistencia donde planes rechazados (ID 4) se mostraban de color verde.
         const estadoClase =
-            info.status_id == 3 ? "verPlan__estado--azul"
-                : info.status_id == 4 || info.status_id == 7
+            info.status_id == 1 || info.status_id == 3 ? "verPlan__estado--azul"
+                : info.status_id == 7
                     ? "verPlan__estado--verde"
-                    : info.status_id == 5 || info.status_id == 6
+                    : info.status_id == 4 || info.status_id == 5 || info.status_id == 6
                         ? "verPlan__estado--rojo"
-                        : ""; // Vacio por default (Asume estado 1 o 2 'En Progreso')
+                        : "";
 
         const verEstado = document.createElement("p");
         verEstado.classList.add("verPlan__estado", estadoClase);

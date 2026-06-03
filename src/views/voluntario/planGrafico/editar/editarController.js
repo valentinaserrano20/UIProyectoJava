@@ -46,7 +46,7 @@ export default async () => {
   botonGuardar.disabled = false;
 
   // FETCH GET Inicilizador de Información a editar
-  const datosGrafico = await api.get(`housingGraphics/${graficoId}`); // Petición Específica de Unidad Croquis
+  const datosGrafico = await api.get(`imagenes/vivienda/${graficoId}`); // Petición Específica de Unidad Croquis
   
   // Render de Preview Visual Mode Solo Lectura FOTO
   preview.src = api.urlStorage + "/" + datosGrafico.path; // Render Static AWS/S3 URL 
@@ -67,7 +67,7 @@ export default async () => {
 
     try {
       // API PATCH METHOD! Partial Resource update specific Description String Overrider
-      const data = await api.patch(`housingGraphics/${graficoId}/description`, datosRegistro);
+      const data = await api.patch(`imagenes/vivienda/${graficoId}/description`, datosRegistro);
       if (data.success) {
         
         // Exito

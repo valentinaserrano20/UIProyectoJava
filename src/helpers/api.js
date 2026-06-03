@@ -15,7 +15,11 @@ const headers = () => ({
   "Content-Type": "application/json",
 });
 
-const manejarSesionExpirada = () => {
+const manejarSesionExpirada = (endpoint) => {
+  const paginasDeAutenticacion = ["login", "register", "forgotPassword", "verifyCode", "changePassword"];
+  if (endpoint && paginasDeAutenticacion.some(p => endpoint.includes(p))) {
+    return;
+  }
   alerta.alertaError("Sesión expirada");
   window.location.href = "#/login";
   localStorage.clear();
@@ -36,7 +40,7 @@ export const get = async (endpoint) => {
       credentials: "include", // CORREGIDO
     });
 
-    if (response.status === 401) { manejarSesionExpirada(); return null; }
+    if (response.status === 401) { manejarSesionExpirada(endpoint); return null; }
 
     const json = await response.json();
     return json.data;
@@ -57,7 +61,7 @@ export const getExiste = async (endpoint) => {
       credentials: "include", // CORREGIDO
     });
 
-    if (response.status === 401) { manejarSesionExpirada(); return null; }
+    if (response.status === 401) { manejarSesionExpirada(endpoint); return null; }
 
     const json = await response.json();
     return json.data && json.data.length > 0;
@@ -78,7 +82,7 @@ export const getPaginacion = async (endpoint) => {
       credentials: "include", // CORREGIDO
     });
 
-    if (response.status === 401) { manejarSesionExpirada(); return null; }
+    if (response.status === 401) { manejarSesionExpirada(endpoint); return null; }
 
     const json = await response.json();
     return { data: json.data, paginate: json.paginate };
@@ -100,7 +104,15 @@ export const post = async (endpoint, datos) => {
       credentials: "include", // CORREGIDO
     });
 
-    if (response.status === 401) { manejarSesionExpirada(); return { success: false, message: "Sesión expirada" }; }
+    if (response.status === 401) {
+      manejarSesionExpirada(endpoint);
+      try {
+        const errJson = await response.json();
+        return { success: false, message: errJson.message || "Credenciales incorrectas o sesión inválida" };
+      } catch (e) {
+        return { success: false, message: "Credenciales incorrectas o sesión inválida" };
+      }
+    }
 
     return await response.json();
   } catch (error) {
@@ -121,7 +133,15 @@ export const postImagen = async (endpoint, datos) => {
       credentials: "include", // CORREGIDO
     });
 
-    if (response.status === 401) { manejarSesionExpirada(); return { success: false, message: "Sesión expirada" }; }
+    if (response.status === 401) {
+      manejarSesionExpirada(endpoint);
+      try {
+        const errJson = await response.json();
+        return { success: false, message: errJson.message || "Credenciales incorrectas o sesión inválida" };
+      } catch (e) {
+        return { success: false, message: "Credenciales incorrectas o sesión inválida" };
+      }
+    }
 
     return await response.json();
   } catch (error) {
@@ -142,7 +162,15 @@ export const put = async (endpoint, datos) => {
       credentials: "include", // CORREGIDO
     });
 
-    if (response.status === 401) { manejarSesionExpirada(); return { success: false, message: "Sesión expirada" }; }
+    if (response.status === 401) {
+      manejarSesionExpirada(endpoint);
+      try {
+        const errJson = await response.json();
+        return { success: false, message: errJson.message || "Sesión expirada o no autorizado" };
+      } catch (e) {
+        return { success: false, message: "Sesión expirada o no autorizado" };
+      }
+    }
 
     return await response.json();
   } catch (error) {
@@ -163,7 +191,15 @@ export const patch = async (endpoint, datos) => {
       credentials: "include", // CORREGIDO
     });
 
-    if (response.status === 401) { manejarSesionExpirada(); return { success: false, message: "Sesión expirada" }; }
+    if (response.status === 401) {
+      manejarSesionExpirada(endpoint);
+      try {
+        const errJson = await response.json();
+        return { success: false, message: errJson.message || "Sesión expirada o no autorizado" };
+      } catch (e) {
+        return { success: false, message: "Sesión expirada o no autorizado" };
+      }
+    }
     if (response.status === 400) {
       const error = await response.json();
       alerta.alertaError(error.message);
@@ -188,7 +224,15 @@ export const delet = async (endpoint) => {
       credentials: "include", // CORREGIDO
     });
 
-    if (response.status === 401) { manejarSesionExpirada(); return { success: false, message: "Sesión expirada" }; }
+    if (response.status === 401) {
+      manejarSesionExpirada(endpoint);
+      try {
+        const errJson = await response.json();
+        return { success: false, message: errJson.message || "Sesión expirada o no autorizado" };
+      } catch (e) {
+        return { success: false, message: "Sesión expirada o no autorizado" };
+      }
+    }
 
     return await response.json();
   } catch (error) {

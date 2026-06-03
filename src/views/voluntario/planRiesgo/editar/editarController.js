@@ -62,10 +62,10 @@ export default async () => {
     const distancia = document.getElementById("distancia");
 
     // Select Autorellenador Option Tool Loader 
-    await adjuntarOpc.adjuntar(amenazas, "threatTypes");
+    await adjuntarOpc.adjuntar(amenazas, "tiposAmenaza");
 
     // Cargar datos actuales del riesgo pre-escritos HTTP GET API Filler (Auto Inject .value Form Native Property Element Binder Array KeyMap) 
-    await cargarDatos.cargarDatos(`riskFactors/${riesgoId}`,
+    await cargarDatos.cargarDatos(`factoresRiesgo/${riesgoId}`,
         [amenazas, descripcion, ubicacion, distancia],
         ["threat_type_id", "description", "ubication", "distance"]
     );
@@ -74,7 +74,7 @@ export default async () => {
      * Helper Func: Pinta lista interactiva de 'Acciones para reducir' actualmente mapeadas a este Riesgo Base Target ID 
      */
     const cargarAcciones = async () => {
-        const acciones = await api.get(`riskReductionActions/riskFactor/${riesgoId}`); // Endpoint 1 N Get List Query Relation Response Mapping App Status Load Json 
+        const acciones = await api.get(`accionesReduccion/factorRiesgo/${riesgoId}`); // Endpoint 1 N Get List Query Relation Response Mapping App Status Load Json 
         contenedorAcciones.innerHTML = "";
 
         acciones.forEach((item) => {
@@ -94,7 +94,7 @@ export default async () => {
      * Helper Func: Pinta lista interactiva de "Factores de Vulnerabilidad" mapeadas a este Riesgo Base Target ID  
      */
     const cargarVulnerabilidades = async () => {
-        const acciones = await api.get(`vulnerabilityFactors/riskFactor/${riesgoId}`); // Endpoint Get Query Fetch DB List Vulnerability Linked Table Data Mapping Response Json Data Formater Request Backend Router Server Controller Action Execute Model Relation N Get Property Linked 
+        const acciones = await api.get(`factoresVulnerabilidad/factorRiesgo/${riesgoId}`); // Endpoint Get Query Fetch DB List Vulnerability Linked Table Data Mapping Response Json Data Formater Request Backend Router Server Controller Action Execute Model Relation N Get Property Linked 
         contenedorVulnerabilidades.innerHTML = "";
 
         acciones.forEach((item) => {
@@ -156,7 +156,7 @@ export default async () => {
 
         try {
             // PATCH EndPoint Factor De Riesgo Padre Update Request Action Database Push SQL Modification Value Parameters Model Mapping Binding Evaluation Results Return Data Json Structure Code Success Boolean Validator Message Helper UI Notice Output Trigger Handlers Scripts 
-            const data = await api.patch(`riskFactors/${riesgoId}`, datosRegistro);
+            const data = await api.patch(`factoresRiesgo/${riesgoId}`, datosRegistro);
             if (data.success) {
                 // Notificar Front Success. Se queda en esta page viva permitiendo anexar sub-ramificaciones hijos (Vulnerabilidades, Acciones). No te patea atrás UX Pattern UI Design Control User Flow Execution Application Component Use Case Functionality Method Process Evaluation Implementation Test Case Procedure Logic Model Form Controller Component Tool Script Request Call Axios Response Catch Error Logic Structure Block Statement Conditional Code Execute Handler 
                 await alerta.alertaOK(data.message);

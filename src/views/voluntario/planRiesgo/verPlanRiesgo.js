@@ -76,7 +76,7 @@ export default async () => {
      */
     const recargarContainer = async () => {
         contenedor.innerHTML = "";
-        await paginacion(`riskFactors/familyPlan/${id}`, mensajeVacio, carta);
+        await paginacion(`factoresRiesgo/planFamiliar/${id}`, mensajeVacio, carta);
     };
 
     // DELEGADOR MAESTRO Contenedor Grid Virtual (Event Bubbling Listener)
@@ -107,7 +107,7 @@ export default async () => {
             if (!confirmacion.isConfirmed) return;
 
             // Rest DELETE DB Execution Target Entity
-            const eliminado = await api.delet(`threats/${riskId}`);
+            const eliminado = await api.delet(`factoresRiesgo/${riskId}`);
 
             if (eliminado.success) {
                 await alerta.alertaOK(eliminado.message);

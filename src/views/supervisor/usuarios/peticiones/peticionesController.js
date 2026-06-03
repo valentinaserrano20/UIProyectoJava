@@ -14,6 +14,18 @@ export default async () => {
     // Instancia el botón de retroceso superior
     const botonBack = document.querySelector("#botonBack");
 
+    // -------------------------------------------------------------
+    // BLOQUE DE PERFIL EN SIDEBAR
+    // -------------------------------------------------------------
+    // Qué hace: Obtiene el nombre completo del usuario de sesión de localStorage y lo asigna a la sidebar.
+    // Por qué existe: Asegura la consistencia del menú lateral mostrando la identidad del usuario logueado.
+    // Qué problema resuelve: Identifica al usuario que realiza la consulta de peticiones en la barra lateral.
+    const nombre = localStorage.getItem("full_name");
+    const labelNombre = document.getElementById("nombreUsuarioSidebar");
+    if (labelNombre && nombre) {
+        labelNombre.textContent = nombre;
+    }
+
     // Contenedor principal que alojará las tarjetas renderizadas por paginación
     const contenedor = document.querySelector(".container__paginas");
 

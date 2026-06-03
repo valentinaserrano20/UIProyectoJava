@@ -1,8 +1,69 @@
- <div class="container">
-    <div class="explicacion">
-        <p class="explicacion__titulo">Gestion de Usuarios</p>
-        <p class="explicacion__subtitulo">Todos los usuarios que se encuentran en el sistema</p>    
+<!--
+  Vista: Gestión de Voluntarios (Supervisor) (index.html)
+  Esta vista implementa la barra lateral de navegación para facilitar el acceso
+  y una zona de contenido principal a la derecha para ver todos los voluntarios del sistema.
+-->
+<div class="container container--noPadding dashboard-layout">
+    
+    <!-- BARRA LATERAL (Aside / Sidebar) -->
+    <aside class="sidebar sidebar--dashboard">
+        <div class="sidebar__lista">
+            <a href="#/supervisor/" class="sidebar__link" id="menuHome">
+                <i class="ri-gallery-view-2 icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Inicio</p>
+                </div>
+            </a>
+            <a href="#/supervisor/plan_familiar/" class="sidebar__link" id="menuPlanes">
+                <i class="ri-file-user-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Planes Familiares</p>
+                </div>
+            </a>
+            <a href="#/supervisor/usuarios/gestion" class="sidebar__link sidebar__link--active" id="menuVoluntarios">
+                <i class="ri-group-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Voluntarios</p>
+                </div>
+            </a>
+            <a href="#/supervisor/plan_familiar/estadistica" class="sidebar__link" id="menuEstadisticas">
+                <i class="ri-bar-chart-2-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Estadísticas</p>
+                </div>
+            </a>
+            <a href="#/supervisor/usuarios/peticiones" class="sidebar__link" id="menuPeticiones">
+                <i class="ri-arrow-left-right-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Peticiones</p>
+                </div>
+            </a>
+            <a href="#/administrador/datos_maestros" class="sidebar__link" id="menuDatosMaestros">
+                <i class="ri-database-2-line icono__grande"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto">Datos Maestros</p>
+                </div>
+            </a>
+            
+            <a href="#/usuario/perfil" class="sidebar__link sidebar__link--perfil" id="menuPerfil">
+                <i class="ri-user-line icono__grande icono__grande--perfil"></i>
+                <div class="siderbar__oculto">
+                    <p class="sidebar__texto" id="nombreUsuarioSidebar">Cargando...</p>
+                    <p class="sidebar__info">Supervisor_Admin</p>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL (Filtros y Tarjetas) -->
+    <div class="dashboard-content">
+        <div class="explicacion">
+            <h2 class="explicacion__titulo">Gestión de Voluntarios</h2>
+            <p class="explicacion__subtitulo">Todos los usuarios voluntarios que se encuentran registrados en el sistema</p>    
+        </div>
+        
+        <div class="container__paginas"></div>
+        
+        <div class="container__paginador"></div>
     </div>
-    <div class="container__paginas"></div>
-    <div class="container__paginador"></div>
 </div>

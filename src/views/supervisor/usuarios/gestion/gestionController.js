@@ -14,6 +14,18 @@ export default async () => {
 
     // Extrae apuntadores a los botones de navegación generales
     const botonBack = document.getElementById("botonBack");
+
+    // -------------------------------------------------------------
+    // BLOQUE DE PERFIL EN SIDEBAR
+    // -------------------------------------------------------------
+    // Qué hace: Obtiene el nombre completo del usuario de sesión de localStorage y lo asigna a la sidebar.
+    // Por qué existe: Asegura la consistencia del menú lateral mostrando la identidad del usuario logueado.
+    // Qué problema resuelve: Identifica al usuario que realiza la consulta de voluntarios en la barra lateral.
+    const nombre = localStorage.getItem("full_name");
+    const labelNombre = document.getElementById("nombreUsuarioSidebar");
+    if (labelNombre && nombre) {
+        labelNombre.textContent = nombre;
+    }
     
     // Contenedor dinámico principal donde se incrustarán las Cards de usuarios paginados
     const contenedor = document.querySelector(".container__paginas");

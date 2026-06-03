@@ -52,10 +52,10 @@ export default async () => {
   const servicio = document.getElementById("servicio");
 
   // Carga Lista Selectora Cascading Dependencies Array Map Function Helper (e.g. Si escoges Hospital, abajo sale Sub-list Servicio: Urgencias, Sangre, Etc)
-  await adjuntarOpc.adjuntarDouble(recurso, "resources", servicio, 'service');
+  await adjuntarOpc.adjuntarDouble(recurso, "tiposRecurso", servicio, 'service');
 
   // Auto-Fill Form from Server Response API GET Model By ID
-  await cargarDatos.cargarDatos(`availableResources/${recursoId}`, [telefono, descripcion, distancia, ubicacion, recurso, servicio], ["phone", "description", "distance", "location", "resource_id", "resource_name"]);
+  await cargarDatos.cargarDatos(`recursosDisponibles/${recursoId}`, [telefono, descripcion, distancia, ubicacion, recurso, servicio], ["phone", "description", "distance", "location", "resource_id", "resource_name"]);
 
   /**
    * --- VALIDATORS NATIVE LISTENERS EN TIEMPO REAL EVENT-DRIVEN ---
@@ -135,7 +135,7 @@ export default async () => {
 
       try {
         // Ejecución Real del Query Patch / Update Controller Method Route Endpoints Application
-        const data = await api.patch(`availableResources/${recursoId}`, datosRegistro);
+        const data = await api.patch(`recursosDisponibles/${recursoId}`, datosRegistro);
 
         if (data.success) {
           // Si DB Respondió Code 200.. OK Redirect..

@@ -1,5 +1,14 @@
-.container__filtro{
+.container__filtro {
     display: flex;
     align-items: center;
     gap: 1rem;
+    width: 100%;
+}
+
+.container__filtro .searchbar {
+    flex: 1;
+}
+
+.container__filtro .dropdown-filtro {
+    flex: 1;
 }

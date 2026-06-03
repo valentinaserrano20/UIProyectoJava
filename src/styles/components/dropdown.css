@@ -1,9 +1,19 @@
 .dropdown-filtro{
-    background-color: var(--color-secundario);
-    border: none;
-    border-radius: 7px;
-    padding: 0.5rem;
-    width: 5rem;
+    background-color: var(--color-palido);
+    border: 1px solid var(--color-fondogristranslucido);
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    width: 14rem;
+    color: var(--color-oscuro);
+    font-family: var(--fuente-contenido);
+    font-size: var(--tamano-mediano);
+    outline: none;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
 
-    color: var(--color-grisFondo)
+.dropdown-filtro:hover, .dropdown-filtro:focus {
+    border-color: var(--color-secundario);
+    box-shadow: 0 0 0 2px var(--color-fondoazultranslucido);
 }

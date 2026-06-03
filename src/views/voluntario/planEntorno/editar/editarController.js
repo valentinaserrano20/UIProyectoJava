@@ -58,8 +58,8 @@ export default async () => {
   };
 
   // Primera consulta: El sistema revisa si el usuario ya le había asignado una foto previa a esta vivienda
-  const existeData = await api.get(`housingInfo/${id}/type/${id_HousingInfoType}`);
-  const existe = existeData !== null && existeData !== undefined;
+  const existeData = await api.get(`imagenes/entorno/planFamiliar/${id}`);
+  const existe = existeData !== null && existeData !== undefined && existeData !== "";
 
   if (existe) {
     preview.src = `${api.urlStorage}/${existeData.path}`;
@@ -130,16 +130,8 @@ export default async () => {
     formData.append("housing_info_type_id", id_HousingInfoType);
 
     try {
-      // Regla de reemplazo: Si anteriormente dedujimos que existía una foto, la eliminaremos del servidor 
-      const existeAhoraData = await api.get(`housingInfo/${id}/type/${id_HousingInfoType}`);
-      const existeAhora = existeAhoraData !== null && existeAhoraData !== undefined;
-
-      const data = existeAhora
-        ? await api.postImagen(`housingInfo/${id}/type/${id_HousingInfoType}`, formData)
-        : await api.postImagen(`housingInfo`, formData);
-
-      // Subida forjada usando el conducto especializado para información multimedia
-      // const data = await api.postImagen(`housingInfo`, formData);
+      // Subida de imagen al controlador centralizado en español
+      const data = await api.postImagen(`imagenes/entorno`, formData);
 
       // Retroalimentación visual evaluando éxito
       if (data.success) {

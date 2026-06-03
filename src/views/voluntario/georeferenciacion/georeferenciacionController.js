@@ -46,8 +46,8 @@ export default async () => {
   };
 
   // Comprueba si durante este proceso el voluntario cerró y volvió, para no borrar imagen existente
-  const existeData = await api.get(`housingInfo/${id}/type/${id_HousingInfoType}`);
-  const existe = existeData !== null && existeData !== undefined;
+  const existeData = await api.get(`imagenes/georeferenciacion/planFamiliar/${id}`);
+  const existe = existeData !== null && existeData !== undefined && existeData !== "";
   if (existe) {
     preview.src = `${api.urlStorage}/${existeData.path}`;
     preview.style.display = "block";
@@ -119,20 +119,18 @@ export default async () => {
     formData.append("housing_info_type_id", id_HousingInfoType);
 
     try {
-      // Método Reemplazo Parcial manual (Borra el viejo foto y pon la nueva) para ahorrar Storage
-      const existeAhoraData = await api.get(`housingInfo/${id}/type/${id_HousingInfoType}`);
-      const existeAhora = existeAhoraData !== null && existeAhoraData !== undefined;
-
-      const data = existeAhora ? await api.postImagen(`housingInfo/${id}/type/${id_HousingInfoType}`, formData) : await api.postImagen(`housingInfo`, formData);
-
-      // Exec API Inserciónd
-      // const data = await api.postImagen(`housingInfo`, formData);
+      // Subida de imagen al controlador centralizado en español
+      const data = await api.postImagen(`imagenes/georeferenciacion`, formData);
       if (data.success) {
         // Exito
         await alerta.alertaOK(data.message);
         
-        // Enrutamiento Forzado (Al ser Helper Linear de Georeferencia, Retorna al Módulo Identificación Avanzada)
-        // location.href = `#/voluntario/plan_familiar/identificacion?id=${id}`;
+        // Redirigir al menú o revisión según el rol
+        if (esSupervisor) {
+          location.href = `#/supervisor/plan_familiar/revision?familia_id=${id}`;
+        } else {
+          location.href = `#/voluntario/plan_familiar/familia?id=${id}`;
+        }
       } else {
         alerta.alertaWarning(data.message, data.errors);
       }

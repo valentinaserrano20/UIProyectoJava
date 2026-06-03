@@ -31,7 +31,7 @@ export default async () => {
     const amenaza = document.getElementById('tiposAmenaza'); // Select Diccionario
     
     // Inyecta opciones de la DB "Sismo, Incendio..." en el Select 'amenaza'
-    await adjuntarOpc.adjuntar(amenaza, "threatTypes");
+    await adjuntarOpc.adjuntar(amenaza, "tiposAmenaza");
 
     window.procesoPeticion = false;
     botonSiguiente.disabled = false;
@@ -53,7 +53,7 @@ export default async () => {
         
         try {
             // Push HTTP Create Resource Entry Factor Riesgo "RiskFactors" tables back
-            const data = await api.post(`riskFactors`, datosRegistro); // Call Helpers Axios Wrapper Fetch 
+            const data = await api.post(`factoresRiesgo`, datosRegistro); // Call Helpers Axios Wrapper Fetch 
             
             if (data.success) {
                 await alerta.alertaOK(data.message) 

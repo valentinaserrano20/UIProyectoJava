@@ -1,7 +1,7 @@
 import * as api from "../../helpers/api";
 // crear un dropdown para filtrar
 
-export const dropdownFiltro = async() => {
+export const dropdownFiltro = async(esVoluntario = false) => {
     const dropdown = document.createElement("select");
     dropdown.classList.add("dropdown-filtro");
 
@@ -12,18 +12,33 @@ export const dropdownFiltro = async() => {
 
     dropdown.append(todos);
 
-    // agarrar los estados de planes familiares desde la DB
-    const estados = await api.get("statusPlans")
+    if (esVoluntario) {
+        // Para voluntario, definimos opciones fijas personalizadas
+        const opciones = [
+            { id: 2, name: "Pendiente" },
+            { id: 4, name: "Rechazado" },
+            { id: 5, name: "Rechazado con observaciones" },
+            { id: 3, name: "Por definir" }
+        ];
+        opciones.forEach(opt => {
+            const option = document.createElement("option");
+            option.textContent = opt.name;
+            option.value = opt.id;
+            option.classList.add("dropdown-filtro__item");
+            dropdown.append(option);
+        });
+    } else {
+        // agarrar los estados de planes familiares desde la DB
+        const estados = await api.get("statusPlans")
 
-    estados.forEach(estado => {
-        const option = document.createElement("option");
-        option.textContent = estado.name;
-        option.value = estado.id
-        option.classList.add("dropdown-filtro__item")
-        dropdown.append(option)
-    })
-
-    console.log(estados)
+        estados.forEach(estado => {
+            const option = document.createElement("option");
+            option.textContent = estado.name;
+            option.value = estado.id
+            option.classList.add("dropdown-filtro__item")
+            dropdown.append(option)
+        })
+    }
 
     return dropdown
 }

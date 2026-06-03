@@ -78,7 +78,7 @@ export default async () => {
     const recargarContainer = async () => {
         contenedor.innerHTML = ""; // Clear Virtual DOM
         // El helper 'paginacion' hace la Request Red y mapea la funcion 'carta' por cada resultado.
-        await paginacion(`housingGraphics/familyPlan/${id}`, mensajeVacio, carta);
+        await paginacion(`imagenes/vivienda/planFamiliar/${id}`, mensajeVacio, carta);
     };
 
     // DELEGADOR DE EVENTOS GLOBALES: En lugar de agregar 3 event listeners x cada de las N cartas,
@@ -111,7 +111,7 @@ export default async () => {
             if (!confirmacion.isConfirmed) return;
 
             // Exec API DELETE Row (Borra file object server interno de paso)
-            const eliminado = await api.delet(`housingGraphics/${graficoId}`);
+            const eliminado = await api.delet(`imagenes/vivienda/${graficoId}`);
 
             if (eliminado.success) {
                 await alerta.alertaOK(eliminado.message);

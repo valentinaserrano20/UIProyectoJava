@@ -3,8 +3,8 @@ import * as alerta from "../../helpers/alertas";
 
 const factorRiesgoVentana = async (factor, miembrosFamilia, info) => {
 
-    const threatTypes = await api.get(`threatTypes/${factor.threat_type_id}`);
-    const riskReduction = await api.get(`riskReductionActions/riskFactor/${factor.id}`);
+    const threatTypes = await api.get(`tiposAmenaza/${factor.threat_type_id}`);
+    const riskReduction = await api.get(`accionesReduccion/factorRiesgo/${factor.id}`);
 
     const overlay = document.createElement("div");
     overlay.classList.add("overlay_verEstado");

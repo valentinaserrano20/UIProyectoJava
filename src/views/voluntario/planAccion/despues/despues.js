@@ -47,7 +47,7 @@ export default async () => {
 
   // Trae las listas reales con información de la base de datos para los familiares y los riesgos
   await adjuntarOpc.adjuntarMiembros(miembro, `members/familyPlan/select/${id}`,);
-  await adjuntarOpc.adjuntarFactorRiesgo(factorRiesgo, `riskFactors/familyPlan/select/${id}`);
+  await adjuntarOpc.adjuntarFactorRiesgo(factorRiesgo, `factoresRiesgo/planFamiliar/seleccion/${id}`);
 
   // Eventos que quitan las alertas visuales en rojo del error de validación cuando se corrige un valor
   miembro.addEventListener("change", () => {
@@ -91,6 +91,7 @@ export default async () => {
       const datosRegistro = {
         member_id: miembro.value,
         risk_factor_id: factorRiesgo.value,
+        family_plan_id: id,
       };
 
       try {

@@ -50,7 +50,7 @@ export default async () => {
 
   // Solicitar al servidor los listados de miembros y riesgos de esta familia para rellenar las opciones correspondientes
   await adjuntarOpc.adjuntarMiembros(miembro, `members/familyPlan/select/${id}`,);
-  await adjuntarOpc.adjuntarFactorRiesgo(factorRiesgo, `riskFactors/familyPlan/select/${id}`);
+  await adjuntarOpc.adjuntarFactorRiesgo(factorRiesgo, `factoresRiesgo/planFamiliar/seleccion/${id}`);
 
   // Eventos para detectar cuando el usuario selecciona una opción válida y así limpiar las advertencias rojas (errores en pantalla)
   miembro.addEventListener("change", () => {
@@ -87,18 +87,17 @@ export default async () => {
     boton.disabled = true;
 
     // Verificar que el usuario no haya dejado las listas desplegables en blanco
-    // let validarMiembro = validacion.validar_Select(miembro);
-    // let validarFactorRiesgo = validacion.validar_Select(factorRiesgo);
-    validacion.validar_select(miembro);
-    validacion.validar_select(factorRiesgo);
+    let validarMiembro = validacion.validarSelect(miembro);
+    let validarFactorRiesgo = validacion.validarSelect(factorRiesgo);
 
     // Si toda la selección es correcta
-    if (validacion.validar_select) {
+    if (validarMiembro && validarFactorRiesgo) {
 
       // Empaquetar los datos básicos para ser guardados
       const datosRegistro = {
         member_id: miembro.value,
         risk_factor_id: factorRiesgo.value,
+        family_plan_id: id,
       };
 
       try {
