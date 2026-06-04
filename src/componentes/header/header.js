@@ -10,10 +10,13 @@ export const componenteHeader = () => {
     const hash = location.hash.slice(2);
 
     // Función para actualizar el indicador de notificaciones
+    // Qué hace: Consulta al API el conteo de notificaciones no leídas del usuario
+    // Por qué existe: Permite mostrar en el header la burbuja con el conteo de alertas pendientes
+    // Qué problema resuelve: Evita el TypeError de lectura de nulos y lee el conteo según el formato desempaquetado por api.get
     const actualizarIndicadorNotificaciones = async () => {
         try {
             const response = await api.get("notificaciones/count");
-            if (response.success) {
+            if (response && response.count !== undefined) {
                 const count = response.count;
                 indicador.classList.remove('invisible');
                 
@@ -31,8 +34,13 @@ export const componenteHeader = () => {
         }
     };
 
-    // Cargar conteo de notificaciones al iniciar
-    actualizarIndicadorNotificaciones();
+    // Cargar conteo de notificaciones al iniciar solo si el usuario está autenticado
+    // Qué hace: Valida si existe un ID de usuario en el almacenamiento local antes de consultar el conteo
+    // Por qué existe: Evita peticiones anónimas al backend que respondan con 401 en la vista de login
+    // Qué problema resuelve: Elimina la alerta de sesión expirada que se disparaba en bucle al cargar la pantalla de login
+    if (localStorage.getItem("id")) {
+        actualizarIndicadorNotificaciones();
+    }
 
     // botón HOME
     botonHome.addEventListener("click", () => {

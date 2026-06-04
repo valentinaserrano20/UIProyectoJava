@@ -122,11 +122,14 @@ export default async () => {
     };
 
     // Función para cargar notificaciones
+    // Qué hace: Consume el endpoint GET de notificaciones a través del helper api
+    // Por qué existe: Obtiene el listado completo de alertas y avisos asociados al voluntario o supervisor activo
+    // Qué problema resuelve: Corrige la lectura errónea de response.success y response.data debido a que api.get ya desempaqueta el JSON raíz devolviendo directamente el Array de datos
     const cargarNotificaciones = async () => {
         try {
             const response = await api.get("notificaciones");
-            if (response.success) {
-                notificaciones = response.data;
+            if (response && Array.isArray(response)) {
+                notificaciones = response;
                 aplicarFiltro();
             }
         } catch (error) {
