@@ -48,8 +48,16 @@ export default async () => {
   // Inyección Custom Title en Top Bar UI (Ej: Familia "Perez Rodriguez")
   nombreFamilia.textContent += `${planFamiliar.last_names || ""}`;
 
-  // Ocultar botón Enviar para supervisores, ya que la revisión y aprobación/rechazo se maneja desde su dashboard específico
-  if (esSupervisor) {
+  // Qué hace: Oculta el botón de enviar si es supervisor o si el plan ya fue enviado, aprobado o rechazado.
+  // Por qué existe: Previene que el voluntario intente enviar un plan que ya no está en borrador ni requiere correcciones.
+  // Qué problema resuelve: Asegura el modo de solo lectura para el menú central del voluntario.
+  if (
+    esSupervisor ||
+    planFamiliar.status_plan_id === 1 ||
+    planFamiliar.status_plan_id === 4 ||
+    planFamiliar.status_plan_id === 6 ||
+    planFamiliar.status_plan_id === 7
+  ) {
     botonEnviar.classList.add("invisible");
   }
 

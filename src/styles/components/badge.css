@@ -22,3 +22,8 @@
   color: var(--color-primario);
   background-color: var(--color-fononaranjatranslucido);
 }
+
+.badge--azul {
+  color: var(--color-secundario);
+  background-color: var(--color-fondoazultranslucido);
+}

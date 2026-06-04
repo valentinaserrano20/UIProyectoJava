@@ -46,9 +46,9 @@ export default async () => {
     const recargarContainer = async () => {
         contenedor.innerHTML = ""; // Hard reset
 
-        // El script helpers Paginador consume un endpoint exclusivo 'requestsSupervisors' 
+        // El script helpers Paginador consume un endpoint exclusivo 'usuarios/peticiones' 
         // Pasando su propia lógica de Fetch Pages + el template `carta`
-        await paginacion(`users/requests/supervisors`, mensajeVacio, tarjetaPeticion);
+        await paginacion(`usuarios/peticiones`, mensajeVacio, tarjetaPeticion);
     };
 
     //evento para que al dar click en la tarjeta aparezca el modal, en cualquier lado de la tarjeta

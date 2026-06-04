@@ -13,9 +13,16 @@ export const dropdownFiltro = async(esVoluntario = false) => {
     dropdown.append(todos);
 
     if (esVoluntario) {
-        // Para voluntario, definimos opciones fijas personalizadas
+        // -------------------------------------------------------------
+        // OPCIONES DE FILTRADO PREDETERMINADAS PARA EL VOLUNTARIO
+        // -------------------------------------------------------------
+        // Qué hace: Define la lista estática de estados por los cuales el voluntario puede filtrar sus planes.
+        // Por qué existe: Permite al voluntario segmentar y ubicar rápidamente planes según si están en borrador, enviados, aprobados o rechazados.
+        // Qué problema resuelve: Agrega las opciones de "Enviado" y "Aprobado" que antes no estaban disponibles en el menú de filtros del voluntario.
         const opciones = [
             { id: 2, name: "Pendiente" },
+            { id: 1, name: "Enviado" },
+            { id: 7, name: "Aprobado" },
             { id: 4, name: "Rechazado" },
             { id: 5, name: "Rechazado con observaciones" },
             { id: 3, name: "Por definir" }

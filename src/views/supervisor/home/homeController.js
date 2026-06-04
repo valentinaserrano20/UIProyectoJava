@@ -26,13 +26,16 @@ export default async () => {
     // Qué problema resuelve: Mejora la experiencia de usuario adaptando el saludo (Bienvenido/a).
     const genero = localStorage.getItem("gender_id");
 
-    // Qué hace: Evalúa si el ID de género corresponde a femenino (ID = 2) y agrega el sufijo correcto.
-    // Por qué existe: Asegura que el saludo concuerde con el género de la persona.
-    // Qué problema resuelve: Resuelve la falta de concordancia de género en el saludo de bienvenida.
+    // Qué hace: Evalúa si el ID de género corresponde a femenino (ID = 2) para adaptar el saludo.
+    // Por qué existe: Asegura la concordancia gramatical de género del saludo (Bienvenido o Bienvenida).
+    // Qué problema resuelve: Evita textos toscos o mal formateados al saludar al usuario.
+    let saludo = "Bienvenido";
     if (genero == 2) {
-        explicaciontitulo.innerHTML += "a " + nombre;
-    } else {
-        explicaciontitulo.innerHTML += " " + nombre;
+        saludo = "Bienvenida";
+    }
+
+    if (explicaciontitulo && nombre) {
+        explicaciontitulo.textContent = `${saludo}, ${nombre}`;
     }
 
     // -------------------------------------------------------------
@@ -138,10 +141,15 @@ export default async () => {
     try {
         const paginado = await api.getPaginacion("familyPlans");
         if (paginado && paginado.data) {
-            // Qué hace: Selecciona únicamente los 3 primeros planes del listado general.
-            // Por qué existe: Mantiene la vista del dashboard limpia y enfocada en lo más urgente (más reciente).
-            // Qué problema resuelve: Evita sobrecargar el scroll del panel principal con listas extensas de planes.
-            const ultimosPlanes = paginado.data.slice(0, 3);
+            // Qué hace: Filtra para obtener únicamente los planes que están en estado Enviado (Pendiente de revisión, status_id === 1).
+            // Por qué existe: La sección de "últimos planes recibidos" debe listar solo aquellos pendientes de evaluación por el supervisor.
+            // Qué problema resuelve: Evita mostrar en la bandeja de entrada planes que ya están aprobados, rechazados o en corrección.
+            const planesPendientes = paginado.data.filter(plan => plan.status_id === 1);
+
+            // Qué hace: Toma los 3 planes pendientes más recientes.
+            // Por qué existe: Mantiene el dashboard compacto y centrado en la cola de trabajo inmediata.
+            // Qué problema resuelve: Previene saturación visual en la pantalla de inicio del supervisor.
+            const ultimosPlanes = planesPendientes.slice(0, 3);
             
             // Qué hace: Llama a la función local para pintar los elementos dinámicos en móvil y escritorio.
             // Por qué existe: Separa la lógica de presentación de la lógica de petición asíncrona del home.
@@ -215,17 +223,29 @@ const renderUltimosPlanes = (planes) => {
         
         contenido.append(titulo, sub1, sub2);
         
-        // Determinar badge de color del estado
+        // Qué hace: Determina el color y la etiqueta de texto según el rol del supervisor.
+        // Por qué existe: El supervisor ve el estado 1 como "Pendiente" y el estado 5 (devuelto para corregir) como "Enviado".
+        // Qué problema resuelve: Asegura consistencia de terminología e impide mostrar "Enviado" en planes que requieren su revisión.
         let badgeClass = "badge--pendiente";
-        if (plan.status_id == 4 || plan.status_id == 7) {
+        let estadoTexto = plan.status;
+
+        if (plan.status_id == 1) {
+            badgeClass = "badge--pendiente";
+            estadoTexto = "Pendiente";
+        } else if (plan.status_id == 5) {
+            badgeClass = "badge--azul";
+            estadoTexto = "Enviado";
+        } else if (plan.status_id == 7) {
             badgeClass = "badge--completado";
-        } else if (plan.status_id == 5 || plan.status_id == 6) {
+            estadoTexto = "Aprobado";
+        } else if (plan.status_id == 4 || plan.status_id == 6) {
             badgeClass = "badge--rechazado";
+            estadoTexto = plan.status;
         }
         
         const estadoBadge = document.createElement("span");
         estadoBadge.classList.add("badge", badgeClass);
-        estadoBadge.textContent = plan.status;
+        estadoBadge.textContent = estadoTexto;
         
         tarjeta.append(icono, contenido, estadoBadge);
         listaMovil.append(tarjeta);
@@ -270,7 +290,7 @@ const renderUltimosPlanes = (planes) => {
         
         const estadoBadgeDesktop = document.createElement("span");
         estadoBadgeDesktop.classList.add("badge", badgeClass);
-        estadoBadgeDesktop.textContent = plan.status;
+        estadoBadgeDesktop.textContent = estadoTexto;
         celdaEstado.append(estadoBadgeDesktop);
         
         fila.append(celdaFamilia, celdaOrganizacion, celdaFecha, celdaVoluntario, celdaEstado);

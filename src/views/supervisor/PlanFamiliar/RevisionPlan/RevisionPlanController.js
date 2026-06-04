@@ -19,11 +19,11 @@ const RevisionPlanController = async () => {
     // console.log(info);
     
 
-    const familyMembers = await api.get(`familyMembers/`);
+    const familyMembers = await api.get(`integrantes/`);
 
-    const sectors = await api.get(`sectors/`);
+    const sectors = await api.get(`sectores/`);
 
-    const pets = await api.get(`pets/`);
+    const pets = await api.get(`mascotas/`);
 
     const riskFactors = await api.get(`factoresRiesgo/`);
 
@@ -65,7 +65,10 @@ const RevisionPlanController = async () => {
     const familiaCont = document.createElement("div");
     familiaCont.classList.add("form_autorizacion", "form-top_autorization");
 
-    if (info.status_plan_id !== 6 && info.status_plan_id !== 7) {
+    // Qué hace: Habilita el botón de editar datos básicos únicamente si el plan está en estado Enviado (1).
+    // Por qué existe: Previene que el supervisor altere la información cuando el plan ya ha sido aprobado, rechazado o devuelto.
+    // Qué problema resuelve: Asegura la integridad de los datos en planes ya evaluados o en proceso de corrección por el voluntario.
+    if (info.status_plan_id === 1) {
         familiaCont.append(apellidoFamilia, btnEditarDatos);
     } else {
         familiaCont.append(apellidoFamilia);
@@ -388,11 +391,46 @@ const RevisionPlanController = async () => {
     botonesContenedor.classList.add("tarjeta--botones");
     botonesContenedor.append(aprobar, rechazarCambios, rechazarDefinitivo);
 
-    if (info.status_plan_id == 7 || info.status_plan_id == 6) {
+    // Qué hace: Oculta el contenedor de botones de acción (Aprobar, Cambios, Rechazar) si el plan no está en estado Enviado (1).
+    // Por qué existe: Asegura que el supervisor no pueda volver a calificar planes que ya han sido aprobados, rechazados o devueltos al voluntario.
+    // Qué problema resuelve: Bloquea las acciones de revisión para planes que ya están en estados finales o en corrección por el voluntario.
+    if (info.status_plan_id !== 1) {
         botonesContenedor.classList.add("oculto");
     }
 
-    div.append(tarjetaIntroduccion, tarjetaContenido);
+    div.append(tarjetaIntroduccion);
+
+    // Qué hace: Si el plan tiene observaciones de rechazo previas, agrega un bloque informativo destacado al inicio.
+    // Por qué existe: Permite al supervisor consultar directamente las observaciones y el feedback enviado al voluntario.
+    // Qué problema resuelve: Hace visible el motivo de la devolución en la pantalla de revisión del supervisor.
+    if (info.comentary) {
+        const alertaObservacion = document.createElement("div");
+        alertaObservacion.classList.add("tarjeta-contenido");
+        alertaObservacion.style.backgroundColor = "var(--color-rojizo-25, #fff0f0)";
+        alertaObservacion.style.borderLeft = "4px solid var(--color-rojizo, #ff4d4d)";
+        alertaObservacion.style.padding = "1rem";
+        alertaObservacion.style.margin = "1rem 2rem";
+        alertaObservacion.style.borderRadius = "4px";
+
+        const tituloObs = document.createElement("p");
+        tituloObs.classList.add("form__texto");
+        tituloObs.style.color = "var(--color-rojizo, #d32f2f)";
+        tituloObs.style.fontWeight = "bold";
+        tituloObs.style.marginBottom = "0.5rem";
+        
+        const iconoObs = document.createElement("i");
+        iconoObs.classList.add("icono--pequeno", "ri-feedback-line");
+        tituloObs.append(iconoObs, " Observaciones enviadas al voluntario");
+
+        const textoObs = document.createElement("p");
+        textoObs.classList.add("form__texto");
+        textoObs.textContent = info.comentary;
+
+        alertaObservacion.append(tituloObs, textoObs);
+        div.append(alertaObservacion);
+    }
+
+    div.append(tarjetaContenido);
 
     // Callback del botón 'Aprobar'
     aprobar.addEventListener("click", async () => {

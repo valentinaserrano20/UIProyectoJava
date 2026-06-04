@@ -125,13 +125,16 @@ export const router = async (app) => {
     // VALIDACIONES DE SEGURIDAD Y CONTROL DE RUTAS
     // ========================================================
 
-    corregirQueryParams(hash);
+    // Qué hace: Ejecuta de forma secuencial y con await las validaciones de enrutamiento y seguridad.
+    // Por qué existe: Asegura que si una validación asíncrona redirige por seguridad, la carga de la página actual se detenga de inmediato.
+    // Qué problema resuelve: Resuelve la condición de carrera donde páginas restringidas intentaban cargarse y ejecutar sus controladores antes de la redirección.
+    if (corregirQueryParams(hash)) return;
 
-    validarRol(hash);
+    if (!(await validarRol(hash))) return;
 
-    ocultarEditarUrl(hash);
+    if (await ocultarEditarUrl(hash)) return;
 
-    ocultarUrlFamilia(hash);
+    if (await ocultarUrlFamilia(hash)) return;
 
     // ========================================================
 
@@ -227,7 +230,10 @@ const ocultarEditarUrl = async (hash) => {
 
     const estaEnPlan = hash.includes("plan_familiar/");
 
-    if (!estaEnPlan || !tieneEditar) return;
+    // Qué hace: Retorna false si no se cumple el formato de edición de plan familiar.
+    // Por qué existe: Evita realizar peticiones a la API para rutas no relacionadas con planes o no editables.
+    // Qué problema resuelve: Optimiza la navegación del router.
+    if (!estaEnPlan || !tieneEditar) return false;
 
     const queryString = hash.split("?")[1] || "";
 
@@ -235,7 +241,7 @@ const ocultarEditarUrl = async (hash) => {
 
     const familia_id = params.get("familia_id");
 
-    if (!familia_id) return;
+    if (!familia_id) return false;
 
     const plan = await api.get(`familyPlans/${familia_id}`);
 
@@ -253,7 +259,7 @@ const ocultarEditarUrl = async (hash) => {
                 `Este plan familiar ya fue aprobado o rechazado definitivamente y no se puede editar, te redirigiremos al listado de planes familiares`
             );
 
-            return;
+            return true;
         }
 
         if (esVoluntario) {
@@ -265,9 +271,10 @@ const ocultarEditarUrl = async (hash) => {
                 `Este plan familiar ya fue aprobado o rechazado definitivamente y no se puede editar, te redirigiremos al listado de planes familiares`
             );
 
-            return;
+            return true;
         }
     }
+    return false;
 };
 
 /**
@@ -280,11 +287,14 @@ const ocultarUrlFamilia = async (hash) => {
     const esSupervisor = hash.includes("supervisor/");
     const esVoluntario = hash.includes("voluntario/");
 
+    // Qué hace: Retorna false si la ruta no tiene relación con el plan familiar o su identificador.
+    // Por qué existe: Filtra las validaciones para que operen solo en los módulos del plan de emergencia familiar.
+    // Qué problema resuelve: Evita peticiones innecesarias para otras secciones del sistema (como catálogo o usuarios).
     if (
         !hash.includes("familia_id") &&
         !hash.includes("plan_familiar/")
     ) {
-        return;
+        return false;
     }
 
     const queryString = hash.includes("?")
@@ -293,35 +303,41 @@ const ocultarUrlFamilia = async (hash) => {
 
     const params = new URLSearchParams(queryString);
 
-    const familiaId = params.get("familia_id");
+    const familiaId = params.get("familia_id") || params.get("id");
 
-    if (!familiaId) return;
+    if (!familiaId) return false;
 
     const plan = await api.get(`familyPlans/${familiaId}`);
 
     if (esVoluntario) {
 
+        // Qué hace: Redirige al voluntario al listado general de planes si intenta acceder a un plan ya cerrado o enviado.
+        // Por qué existe: Si el plan está en estado 1 (Enviado), 4 (Rechazado), 6 (Rechazado definitivo) o 7 (Aprobado), el voluntario no tiene botones ni redirecciones habilitados.
+        // Qué problema resuelve: Implementa de forma estricta el requerimiento de que el voluntario solo visualice la tarjeta sin navegación ni accesos adicionales.
         if (
+            plan.status_plan_id === 1 ||
             plan.status_plan_id === 4 ||
             plan.status_plan_id === 6 ||
             plan.status_plan_id === 7
         ) {
 
             window.location.hash =
-                "#/voluntario/plan_familiar";
+                `#/voluntario/plan_familiar`;
 
             alerta.alertaMensaje(
-                `Este plan familiar ya fue enviado por voluntario y no se puede acceder directamente`
+                `Este plan familiar ya está enviado, aprobado o rechazado y no se puede visualizar ni editar directamente.`
             );
 
-            return;
+            return true;
         }
     }
 
     if (esSupervisor) {
 
+        // Qué hace: Impide el acceso al supervisor si el plan es un borrador del voluntario (estado 2 o 3) y no ha sido enviado.
+        // Por qué existe: Asegura que el supervisor no pueda auditar planes incompletos que el voluntario aún no ha remitido formalmente.
+        // Qué problema resuelve: Permite el acceso del supervisor a planes en estado 1 (Enviado) para su correspondiente calificación y revisión.
         if (
-            plan.status_plan_id === 1 ||
             plan.status_plan_id === 2 ||
             plan.status_plan_id === 3
         ) {
@@ -333,9 +349,11 @@ const ocultarUrlFamilia = async (hash) => {
                 `Este plan familiar aún no ha sido enviado por el voluntario, no se puede acceder directamente hasta que el voluntario lo envíe para revisión`
             );
 
-            return;
+            return true;
         }
     }
+
+    return false;
 };
 
 /**
@@ -599,25 +617,35 @@ const recorrerRutas = (
  * @param {Array<string>} arregloHash
  */
 const removerBotonHeader = (arregloHash) => {
+    // Qué hace: Captura el elemento del botón de retroceso ('botonBack') del DOM.
+    // Por qué existe: Permite modificar la visibilidad de la flecha de retroceso de la cabecera general.
+    // Qué problema resuelve: Permite ocultar el botón en pantallas principales y mostrarlo en subpantallas de detalle.
+    const botonBack = document.getElementById("botonBack");
 
-    const botonBack =
-        document.getElementById("botonBack");
-
+    // Qué hace: Valida si el botón de retroceso no está cargado o presente en la página actual.
+    // Por qué existe: Evita errores de excepción de referencia nula al intentar modificar clases en un elemento inexistente.
+    // Qué problema resuelve: Previene fallos de ejecución de JavaScript en pantallas de inicio de sesión o layouts externos.
     if (!botonBack) {
-
         return;
     }
 
-    if (arregloHash.length <= 2) {
+    // Qué hace: Filtra el arreglo de segmentos de la URL eliminando cadenas vacías provocadas por barras diagonales.
+    // Por qué existe: Obtiene la cantidad real de segmentos de navegación excluyendo la diagonal final en URLs como '#/supervisor/'.
+    // Qué problema resuelve: Evita que el botón de retroceso aparezca de forma indebida en el Dashboard principal.
+    const segmentosReales = arregloHash.filter(segmento => segmento !== "");
 
-        botonBack.classList.add(
-            "invisible"
-        );
-
+    // Qué hace: Evalúa si los segmentos reales de navegación son menores o iguales a uno (vista principal).
+    // Por qué existe: Determina si el usuario se encuentra en el Inicio o Dashboard del rol activo.
+    // Qué problema resuelve: Resuelve la inconsistencia visual de mostrar la flecha de retroceso cuando no hay páginas anteriores.
+    if (segmentosReales.length <= 1) {
+        // Qué hace: Añade la clase CSS 'invisible' al botón para ocultarlo visualmente.
+        // Por qué existe: Hace que el botón de retroceso desaparezca de la barra de navegación superior.
+        // Qué problema resuelve: Oculta el botón en el dashboard inicial del supervisor o voluntario.
+        botonBack.classList.add("invisible");
     } else {
-
-        botonBack.classList.remove(
-            "invisible"
-        );
+        // Qué hace: Remueve la clase CSS 'invisible' del botón para mostrarlo visualmente.
+        // Por qué existe: Hace que el botón sea visible y utilizable por el usuario.
+        // Qué problema resuelve: Muestra la flecha de retroceso cuando el usuario ingresa a una subsección o vista de detalle.
+        botonBack.classList.remove("invisible");
     }
 };

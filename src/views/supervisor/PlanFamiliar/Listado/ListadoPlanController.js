@@ -144,23 +144,33 @@ const ListadoPlanController = async () => {
         estadoTipoCont.classList.add("verPlan__tipo--estado");
 
         // -------------------------------------------------------------
-        // ASIGNACIÓN DE COLOR AL BADGE DE ESTADO DEL PLAN
         // -------------------------------------------------------------
-        // Qué hace: Determina la clase CSS de color según el ID de estado del plan.
-        // Por qué existe: Mapea los códigos reales de la BD a colores coherentes en el listado de supervisor.
-        // Qué problema resuelve: Corrige la inconsistencia donde planes rechazados (ID 4) se mostraban de color verde.
-        const estadoClase =
-            info.status_id == 1 || info.status_id == 3 ? "verPlan__estado--azul"
-                : info.status_id == 7
-                    ? "verPlan__estado--verde"
-                    : info.status_id == 4 || info.status_id == 5 || info.status_id == 6
-                        ? "verPlan__estado--rojo"
-                        : "";
+        // ASIGNACIÓN DE COLOR Y TEXTO AL BADGE DE ESTADO DEL PLAN
+        // -------------------------------------------------------------
+        // Qué hace: Determina la clase CSS de color y la etiqueta de texto según el ID de estado del plan.
+        // Por qué existe: Traduce los IDs de la base de datos a estados lógicos del supervisor: Estado 1 es "Pendiente" y Estado 5 es "Enviado" (al voluntario).
+        // Qué problema resuelve: Corrige la inconsistencia de nombres de estados para que coincidan con la bitácora de revisión del supervisor.
+        let estadoClase = "";
+        let estadoTexto = info.status;
+
+        if (info.status_id == 1) {
+            estadoClase = "verPlan__estado--azul";
+            estadoTexto = "Pendiente";
+        } else if (info.status_id == 5) {
+            estadoClase = "verPlan__estado--azul"; // Blue badge for Enviado
+            estadoTexto = "Enviado";
+        } else if (info.status_id == 7) {
+            estadoClase = "verPlan__estado--verde";
+            estadoTexto = "Aprobado";
+        } else if (info.status_id == 4 || info.status_id == 6) {
+            estadoClase = "verPlan__estado--rojo";
+            estadoTexto = info.status;
+        }
 
         const verEstado = document.createElement("p");
         verEstado.classList.add("verPlan__estado", estadoClase);
 
-        verEstado.textContent = info.status;
+        verEstado.textContent = estadoTexto;
 
         tarjetaIntroduccion.append(verEstado);
 
@@ -186,14 +196,17 @@ const ListadoPlanController = async () => {
         div.append(resvisarPlan);
 
 
-        if (info.status_id === 1 || info.status_id === 2 || info.status_id === 3) {
+        // Qué hace: Oculta el botón de revisión y muestra un mensaje si el plan es un borrador del voluntario (estado 2 o 3).
+        // Por qué existe: Los borradores no deben ser revisados por el supervisor hasta que el voluntario los envíe formalmente.
+        // Qué problema resuelve: Permite al supervisor revisar planes en estado 1 (Enviado) y visualizar estados terminales o bajo observación.
+        if (info.status_id === 2 || info.status_id === 3) {
             resvisarPlan.classList.add("oculto");
 
             const mensajeEstado = document.createElement("div");
 
             mensajeEstado.classList.add("verPlan__mensaje--estado");
 
-            if (info.status_id === 1 || info.status_id === 2) {
+            if (info.status_id === 2) {
                 mensajeEstado.textContent = "El plan está en proceso de revisión inicial.";
             } else if (info.status_id === 3) {
                 mensajeEstado.textContent = "El plan está siendo creado en este momento por el voluntario.";

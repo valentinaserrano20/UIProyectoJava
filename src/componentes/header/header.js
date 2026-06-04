@@ -1,3 +1,5 @@
+import * as api from "../../helpers/api";
+
 export const componenteHeader = () => {
     const indicador = document.querySelector(".header__indicador");
     const botonAtras = document.getElementById("botonBack");
@@ -7,16 +9,30 @@ export const componenteHeader = () => {
     const rolId = localStorage.getItem("role_id");
     const hash = location.hash.slice(2);
 
-    indicador.classList.remove('invisible');
+    // Función para actualizar el indicador de notificaciones
+    const actualizarIndicadorNotificaciones = async () => {
+        try {
+            const response = await api.get("notificaciones/count");
+            if (response.success) {
+                const count = response.count;
+                indicador.classList.remove('invisible');
+                
+                if (count === 0) {
+                    indicador.classList.add('invisible');
+                } else if (count >= 10) {
+                    indicador.textContent = '9+';
+                } else {
+                    indicador.textContent = count;
+                }
+            }
+        } catch (error) {
+            console.error("Error al obtener conteo de notificaciones:", error);
+            indicador.classList.add('invisible');
+        }
+    };
 
-    const indicadorNumero = Number(indicador.textContent);
-
-    if (indicadorNumero === 0) {
-        indicador.classList.add('invisible');
-    }
-    else if (indicadorNumero >= 10) {
-        indicador.textContent = '9+';
-    }
+    // Cargar conteo de notificaciones al iniciar
+    actualizarIndicadorNotificaciones();
 
     // botón HOME
     botonHome.addEventListener("click", () => {
@@ -25,11 +41,15 @@ export const componenteHeader = () => {
         else if(rolId == 3)location.href = `#/voluntario`
     });
 
-    // botón PERFIL
-    botonPerfil.addEventListener("click", () => {
-        if (hash == 'usuarios/perfil') return
-        location.hash = "#/usuarios/perfil";
-    });
+    // botón PERFIL - Ocultar para supervisor (ya tiene acceso en sidebar)
+    if (rolId == 2 && botonPerfil) {
+        botonPerfil.style.display = 'none';
+    } else if (botonPerfil) {
+        botonPerfil.addEventListener("click", () => {
+            if (hash == 'usuarios/perfil') return
+            location.hash = "#/usuarios/perfil";
+        });
+    }
 
     botonNoti.addEventListener("click", () => {
         if (hash == 'usuarios/notificaciones') return

@@ -43,6 +43,28 @@
   width: 100%;
 }
 
+/* Variante Grid: muestra tarjetas en cuadrícula de 3 columnas con scroll natural */
+.container__paginas--grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+/* En pantallas medianas (tablets), se reduce a 2 columnas */
+@media (max-width: 1024px) {
+  .container__paginas--grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* En pantallas pequeñas (móviles), se reduce a 1 columna */
+@media (max-width: 600px) {
+  .container__paginas--grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .container__paginador {
   display: grid;
   grid-auto-flow: column;

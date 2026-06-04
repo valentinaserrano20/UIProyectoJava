@@ -249,6 +249,11 @@ export const routes = {
       controlador: usuario.perfilController,
       config: publicRoute
     },
+    "notificaciones": {
+      path: `usuario/notificaciones/index.html`,
+      controlador: usuario.notificacionesController,
+      config: { private: true, permissions: [] },
+    },
   },
 
   // ================= VOLUNTARIO =================
@@ -330,7 +335,7 @@ export const routes = {
       },
 
       estadistica: {
-        path: `supervisor/usuarios/Estadistica/index.html`,
+        path: `supervisor/PlanFamiliar/Estadistica/index.html`,
         controlador: supervisorPlanFamiliar.EstadisticaController,
         config: { ...supervisorRoute, permissions: ["home-frontend.supervisor"] },
       },

@@ -47,7 +47,7 @@
                 </div>
             </a>
             
-            <a href="#/usuario/perfil" class="sidebar__link sidebar__link--perfil" id="menuPerfil">
+            <a href="#/usuarios/perfil" class="sidebar__link sidebar__link--perfil" id="menuPerfil">
                 <i class="ri-user-line icono__grande icono__grande--perfil"></i>
                 <div class="siderbar__oculto">
                     <p class="sidebar__texto" id="nombreUsuarioSidebar">Cargando...</p>
@@ -64,19 +64,45 @@
             <p class="explicacion__subtitulo">Análisis y distribución de Planes Familiares y Cuentas del Sistema</p>
         </div>
 
+        <!-- Fila de Tarjetas Numéricas -->
+        <div class="dashboard-cards-row">
+            <!-- Tarjeta: Total Voluntarios -->
+            <div class="tarjeta dashboard-stat-card">
+                <h3 class="dashboard-stat-card__title">Total Voluntarios</h3>
+                <p class="dashboard-stat-card__value" id="totalVoluntarios">0</p>
+                <p class="form__texto form__texto--secundario">Usuarios con rol de Voluntario</p>
+            </div>
+
+            <!-- Tarjeta: Total Supervisores -->
+            <div class="tarjeta dashboard-stat-card">
+                <h3 class="dashboard-stat-card__title">Total Supervisores</h3>
+                <p class="dashboard-stat-card__value" id="totalSupervisores">0</p>
+                <p class="form__texto form__texto--secundario">Usuarios con rol de Supervisor/Admin</p>
+            </div>
+        </div>
+
         <!-- Sección de Gráficos Analíticos -->
         <div class="dashboard-grid-charts">
-            
-            <!-- Tarjeta 1: Gráficos de Supervisor (Planes) -->
+
+            <!-- Tarjeta 1: Planes por Organización (Barras Horizontales) -->
             <div class="tarjeta dashboard-chart-card">
-                <h3 class="tarjeta__titulo">📊 Estados de Planes Familiares</h3>
-                <p class="form__texto form__texto--secundario">Proporción actual de planes Aprobados, Rechazados y Pendientes.</p>
+                <h3 class="tarjeta__titulo">📊 Planes por Organización</h3>
+                <p class="form__texto form__texto--secundario">Distribución de planes familiares por organización.</p>
                 <div class="dashboard-chart-container">
-                    <canvas id="estadosPlanFamiliar"></canvas>
+                    <canvas id="canvaPlanesPorOrg"></canvas>
                 </div>
             </div>
 
-            <!-- Tarjeta 2: Gráficos de Administrador (Estados de Usuario) -->
+            <!-- Tarjeta 2: Planes por Estado (Dona Dinámica) -->
+            <div class="tarjeta dashboard-chart-card">
+                <h3 class="tarjeta__titulo">📈 Planes por Estado</h3>
+                <p class="form__texto form__texto--secundario">Proporción de planes según su estado actual.</p>
+                <div class="dashboard-chart-container">
+                    <canvas id="canvaPlanesPorEstado"></canvas>
+                </div>
+            </div>
+
+            <!-- Tarjeta 3: Gráficos de Administrador (Estados de Usuario) -->
             <div class="tarjeta dashboard-chart-card">
                 <h3 class="tarjeta__titulo">👥 Estados de Cuentas de Usuario</h3>
                 <p class="form__texto form__texto--secundario">Balance entre cuentas Activas, Inactivas y Peticiones Pendientes.</p>
@@ -85,7 +111,7 @@
                 </div>
             </div>
 
-            <!-- Tarjeta 3: Gráficos de Administrador (Distribución de Roles) -->
+            <!-- Tarjeta 4: Gráficos de Administrador (Distribución de Roles) -->
             <div class="tarjeta dashboard-chart-card">
                 <h3 class="tarjeta__titulo">🛡️ Usuarios por Rol</h3>
                 <p class="form__texto form__texto--secundario">Proporción entre Voluntarios y Supervisores en el sistema.</p>
@@ -94,7 +120,7 @@
                 </div>
             </div>
 
-            <!-- Tarjeta 4: Gráficos de Administrador (Catálogo de Cambios) -->
+            <!-- Tarjeta 5: Gráficos de Administrador (Catálogo de Cambios) -->
             <div class="tarjeta dashboard-chart-card">
                 <h3 class="tarjeta__titulo">📈 Tendencia de Cambios en Catálogos</h3>
                 <p class="form__texto form__texto--secundario">Cantidad mensual de adiciones/ediciones en datos maestros.</p>

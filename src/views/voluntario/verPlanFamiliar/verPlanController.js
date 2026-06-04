@@ -65,14 +65,23 @@ export default async () => {
     const planesFiltrados = todosLosPlanes.filter((plan) => {
       let pasaEstado = true;
       if (filtroEstado !== 0) {
+        // -------------------------------------------------------------
+        // LOGICA DE FILTRADO PARA EL LISTADO DE PLANES DEL VOLUNTARIO
+        // -------------------------------------------------------------
+        // Qué hace: Evalúa las condiciones para cada opción de filtro seleccionada.
+        // Por qué existe: Mapea las opciones del dropdown a las condiciones de datos reales en el JSON.
+        // Qué problema resuelve: Permite filtrar correctamente por borrador/pendiente (estados 2 y 3), de forma unificada, y contempla de manera conjunta los rechazos definitorios (estados 4 y 6).
         if (filtroEstado === 3) {
           // 'Por definir' -> tipo_familia_id == 3 (no ha hecho el test)
           pasaEstado = plan.family_type_id === 3;
         } else if (filtroEstado === 2) {
-          // 'En revision' -> estado_id == 2 y tipo_familia_id !== 3 (test hecho, no enviado)
-          pasaEstado = plan.status_id === 2 && plan.family_type_id !== 3;
+          // 'Pendiente' -> (estado_id == 2 o 3) y tipo_familia_id !== 3 (test hecho, no enviado)
+          pasaEstado = (plan.status_id === 2 || plan.status_id === 3) && plan.family_type_id !== 3;
+        } else if (filtroEstado === 4) {
+          // 'Rechazado' -> estado_id == 4 (Rechazado) o 6 (Rechazado Definitivamente)
+          pasaEstado = plan.status_id === 4 || plan.status_id === 6;
         } else {
-          // Otros estados (Rechazado, Rechazado con observaciones)
+          // Otros estados (Enviado: 1, Rechazado con observaciones: 5, Aprobado: 7)
           pasaEstado = plan.status_id == filtroEstado;
         }
       }

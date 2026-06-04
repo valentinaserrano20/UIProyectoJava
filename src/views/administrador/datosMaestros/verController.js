@@ -18,14 +18,12 @@ export default async () => {
 
   botonBack.onclick = async () => {
     if (window.procesoPeticion) return;
-    location.href = `#/administrador/`;
+    location.href = `#/supervisor/`;
   };
 
   window.addEventListener("click", (e) => {
 
-    if (e.target.closest("#sectionals")) {
-      window.location.href = "#/administrador/datos_maestros/seccionales";
-    }
+
 
     if (e.target.closest("#organizations")) {
       window.location.href = "#/administrador/datos_maestros/organizaciones";
@@ -63,9 +61,7 @@ export default async () => {
       window.location.href = "#/administrador/datos_maestros/recursos";
     }
 
-    if (e.target.closest("#departments")) {
-      window.location.href = "#/administrador/datos_maestros/departamentos";
-    }
+
 
     if(e.target.closest("#vulnerabilities")) {
       window.location.href = "#/administrador/datos_maestros/vulnerabilidades";

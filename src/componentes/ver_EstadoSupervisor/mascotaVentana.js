@@ -121,7 +121,10 @@ const MascotaVentana = async (mascota, info) => {
 
     contenidoVentana.append(nombreCont, especieRazaCont, generoCont, vacunasCont)
 
-    if (info.status_plan_id !== 6 && info.status_plan_id !== 7) {
+    // Qué hace: Incorpora el botón para editar datos de la mascota si y solo si el plan se encuentra Enviado (1).
+    // Por qué existe: Bloquea ediciones si el plan ya ha sido finalizado o enviado de vuelta al voluntario.
+    // Qué problema resuelve: Evita la manipulación de registros de mascotas fuera del estado de revisión inicial.
+    if (info.status_plan_id === 1) {
         ventana.append(btnCerrarCont, contenidoVentana, btnEditar);
     } else {
         ventana.append(btnCerrarCont, contenidoVentana);

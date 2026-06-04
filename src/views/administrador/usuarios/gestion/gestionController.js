@@ -76,7 +76,7 @@ export default async () => {
 
     const recargarContainer = async () => {
         contenedor.innerHTML = "";
-        await paginacion(`users/userForAdmin`, mensajeVacio, carta);
+        await paginacion(`usuarios/administrador`, mensajeVacio, carta);
     };
 
     contenedor.addEventListener("click", async (e) => {

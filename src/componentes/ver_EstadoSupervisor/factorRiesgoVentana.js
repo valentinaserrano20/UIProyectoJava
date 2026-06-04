@@ -143,7 +143,10 @@ const factorRiesgoVentana = async (factor, miembrosFamilia, info) => {
     
     contenidoVentana.append(tipoAmenazaCont, descripcionCont, ubicacionDistanciaCont, accionesReduccionCont);
 
-    if (info.status_plan_id !== 6 && info.status_plan_id !== 7) {
+    // Qué hace: Agrega el botón de edición del factor de riesgo únicamente si el estado del plan es Enviado (1).
+    // Por qué existe: Garantiza que el supervisor no altere datos si el plan no está bajo revisión activa.
+    // Qué problema resuelve: Mantiene la consistencia del modo solo lectura para planes en estados terminales o de corrección.
+    if (info.status_plan_id === 1) {
         ventana.append(btnCerrarCont, contenidoVentana, btnEditar);
     } else {
         ventana.append(btnCerrarCont, contenidoVentana);

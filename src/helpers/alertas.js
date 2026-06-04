@@ -293,7 +293,10 @@ export const verDepartCiudad = (
 
 // Pide mediante la API el historial de auditoria de un registro ({tabla}/history/{id}) y lo formatea en una lista
 export const Historial = async (nombre, id) => {
-    const data = await api.get(`${nombre}/${id}/history`);
+    // Si el nombre de la tabla es 'users', lo convertimos a 'usuarios' para mantener rutas en español
+    const actualNombre = nombre === "users" ? "usuarios" : nombre;
+    const rutaHistorial = actualNombre === "usuarios" ? "historial" : "history";
+    const data = await api.get(`${actualNombre}/${id}/${rutaHistorial}`);
 
     // Construye la bitácora con Array.map() iterando cada acción guardada en la BD
     let contenido = `
@@ -325,6 +328,7 @@ export const Historial = async (nombre, id) => {
 };
 
 // Modal enfocado 100% en la gestión de Peticiones de Usuario: "Se inscribe alguien, ¿Se le aprueba el acceso o se le borra?"
+// Al aprobar, permite seleccionar el rol con el que se registrará (Voluntario o Supervisor)
 export const VerAprobarEliminarUsuarios = (
   htmlModal,
   recargarContainer,
@@ -351,9 +355,21 @@ export const VerAprobarEliminarUsuarios = (
 
     // 👉 PRECONFIRM (APROBAR)
     preConfirm: async () => {
-      // Dispara un segundo Micro-Modal confirmando si de verdad quiere aceptarlo
+      // Micro-Modal intermedio con selector de rol para definir cómo ingresa el usuario
       const confirmacion = await Swal.fire({
-        title: "¿Seguro que deseas aprobar?",
+        title: "Aprobar usuario",
+        html: `
+          <p style="margin-bottom: 12px; font-family: var(--fuente-contenido);">Seleccione el rol con el que se aprobará al usuario:</p>
+          <div class="input" style="max-width: 300px; margin: 0 auto;">
+            <div class="form__inputBox form__inputBox--selector">
+              <i class="ri-shield-user-line"></i>
+              <select class="selector" id="selectRolAprobacion">
+                <option value="1" selected>Voluntario</option>
+                <option value="2">Supervisor</option>
+              </select>
+            </div>
+          </div>
+        `,
         icon: "question",
         showCancelButton: true,
         confirmButtonText: "Sí, aprobar",
@@ -361,16 +377,22 @@ export const VerAprobarEliminarUsuarios = (
         customClass: {
             confirmButton: 'botonOK',
             cancelButton: 'botonEliminar',
+        },
+        // Captura el valor del select antes de cerrarse
+        preConfirm: () => {
+          const rolSeleccionado = document.getElementById("selectRolAprobacion").value;
+          return { rol_id: Number(rolSeleccionado) };
         }
       });
 
       // Si se arrepintió, bloquea ejecución
       if (!confirmacion.isConfirmed) return false;
 
-      // Invoca el endpoint API modificando el `state_user_id` a 1 (aprobado formal)
+      // Invoca el endpoint de aprobación con el rol seleccionado
       try {
-        const response = await api.patch(`users/${id}/change-status`,{user_ids: [id], state_user_id: 1, async: false});
-        //asycn opcional para que la respuesta sea inmediata y no por cola (opcional)
+        const response = await api.patch(`usuarios/aprobar/${id}`, {
+          rol_id: confirmacion.value.rol_id
+        });
 
         if (response.success) {
           await alertaOK(response.message);
@@ -407,9 +429,9 @@ export const VerAprobarEliminarUsuarios = (
 
       if (!confirmacion.isConfirmed) return;
 
-      // Borrado definitivo vía API
+      // Borrado definitivo vía API usando la ruta correcta del backend Java
       try {
-        const response = await api.delet(`users/${id}`);
+        const response = await api.delet(`usuarios/${id}`);
 
         if (response.success) {
           await alertaOK(response.message);
@@ -427,6 +449,187 @@ export const VerAprobarEliminarUsuarios = (
 };
 
 // Modal visor multifunción enfocado en los roles y administración de bloqueos (Suspensiones) 
+// de usuarios existentes que ya ingresaron a la plataforma.
+// Helper interno para mostrar el modal de edición de datos personales del usuario
+const mostrarFormularioEdicionUsuario = async (id, recargarContainer) => {
+  try {
+    // 1. Obtener la información técnica del usuario actual
+    const datos = await api.get(`usuarios/${id}`);
+    if (!datos) {
+      alertaError("No se pudieron cargar los datos del usuario.");
+      return;
+    }
+
+    // 2. Consultar catálogos para rellenar los combos selectores
+    const tiposDoc = await api.get("public/tipos-documento") || [];
+    const generos = await api.get("public/generos") || [];
+    const organizaciones = await api.get("public/organizaciones") || [];
+
+    // 3. Limpieza de datos: coalescencia nula para evitar "undefined" en los campos
+    const nombre = datos.names ?? "";
+    const apellido = datos.last_names ?? "";
+    const docNum = datos.document_number ?? "";
+    const fechaNac = datos.birth_date ?? "";
+    const celular = datos.phone ?? "";
+    const correo = datos.email ?? "";
+
+    // 4. Generar opciones HTML dinámicas para Documentos
+    let opcionesTiposDoc = `<option value="" hidden>Seleccione tipo de documento...</option>`;
+    tiposDoc.forEach(t => {
+      // Comparación flexible: el backend puede enviar el ID como número o string
+      const sigla = t.sigla ?? "";
+      const desc = t.descripcion ?? "";
+      opcionesTiposDoc += `<option value="${t.id}" ${t.id == datos.document_type_id ? "selected" : ""}>${sigla} - ${desc}</option>`;
+    });
+
+    // 5. Generar opciones HTML dinámicas para Géneros
+    let opcionesGeneros = `<option value="" hidden>Seleccione género...</option>`;
+    generos.forEach(g => {
+      const nombreG = g.nombre ?? "";
+      opcionesGeneros += `<option value="${g.id}" ${g.id == datos.gender_id ? "selected" : ""}>${nombreG}</option>`;
+    });
+
+    // 6. Generar opciones HTML dinámicas para Organizaciones
+    let opcionesOrg = `<option value="" hidden>Seleccione organización...</option>`;
+    organizaciones.forEach(o => {
+      const nombreO = o.nombre ?? "";
+      const seccionalO = o.seccional ?? "";
+      opcionesOrg += `<option value="${o.id}" ${o.id == datos.organization_id ? "selected" : ""}>${nombreO} (${seccionalO})</option>`;
+    });
+
+    // 7. Lanzar modal de edición con estructura HTML idéntica al resto del proyecto
+    Swal.fire({
+      title: "Editar Datos Personales",
+      html: `
+        <form class="form" style="max-height: 450px; overflow-y: auto; padding: 5px 10px;">
+          <!-- Campo: Nombres -->
+          <div class="input">
+            <div class="form__inputBox">
+              <i class="ri-user-line"></i>
+              <input type="text" placeholder="Nombres" id="editNombre" value="${nombre}" autocomplete="off">
+            </div>
+          </div>
+          <!-- Campo: Apellidos -->
+          <div class="input">
+            <div class="form__inputBox">
+              <i class="ri-user-line"></i>
+              <input type="text" placeholder="Apellidos" id="editApellido" value="${apellido}" autocomplete="off">
+            </div>
+          </div>
+          <!-- Campo: Tipo de Documento (selector) -->
+          <div class="input">
+            <div class="form__inputBox form__inputBox--selector">
+              <i class="ri-id-card-line"></i>
+              <select class="selector" id="editTipoDoc">${opcionesTiposDoc}</select>
+            </div>
+          </div>
+          <!-- Campo: Número de Documento -->
+          <div class="input">
+            <div class="form__inputBox">
+              <i class="ri-info-card-line"></i>
+              <input type="text" placeholder="Número de documento" id="editDocNum" value="${docNum}" autocomplete="off">
+            </div>
+          </div>
+          <!-- Campo: Fecha de Nacimiento -->
+          <div class="input">
+            <div class="form__inputBox">
+              <i class="ri-calendar-line"></i>
+              <input type="date" placeholder="Fecha de nacimiento" id="editFechaNac" value="${fechaNac}">
+            </div>
+          </div>
+          <!-- Campo: Género (selector) -->
+          <div class="input">
+            <div class="form__inputBox form__inputBox--selector">
+              <i class="ri-men-line"></i>
+              <select class="selector" id="editGenero">${opcionesGeneros}</select>
+            </div>
+          </div>
+          <!-- Campo: Celular -->
+          <div class="input">
+            <div class="form__inputBox">
+              <i class="ri-phone-line"></i>
+              <input type="text" placeholder="Celular" id="editCelular" value="${celular}" autocomplete="off">
+            </div>
+          </div>
+          <!-- Campo: Organización / Seccional (selector) -->
+          <div class="input">
+            <div class="form__inputBox form__inputBox--selector">
+              <i class="ri-building-line"></i>
+              <select class="selector" id="editOrganizacion">${opcionesOrg}</select>
+            </div>
+          </div>
+          <!-- Campo: Correo Electrónico -->
+          <div class="input">
+            <div class="form__inputBox">
+              <i class="ri-mail-line"></i>
+              <input type="email" placeholder="Correo electrónico" id="editCorreo" value="${correo}" autocomplete="off">
+            </div>
+          </div>
+        </form>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Guardar",
+      cancelButtonText: "Cancelar",
+      customClass: {
+        confirmButton: "botonOK",
+        cancelButton: "botonCancelar"
+      },
+      preConfirm: async () => {
+        // Captura de todos los valores del formulario
+        const names = document.getElementById("editNombre").value.trim();
+        const last_names = document.getElementById("editApellido").value.trim();
+        const document_type_id = Number(document.getElementById("editTipoDoc").value);
+        const document_number = document.getElementById("editDocNum").value.trim();
+        const birth_date = document.getElementById("editFechaNac").value;
+        const gender_id = Number(document.getElementById("editGenero").value);
+        const phone = document.getElementById("editCelular").value.trim();
+        const organization_id = Number(document.getElementById("editOrganizacion").value);
+        const email = document.getElementById("editCorreo").value.trim();
+
+        // Validación de campos obligatorios antes de enviar
+        if (!names || !last_names || !document_number || !birth_date || !phone || !email) {
+          Swal.showValidationMessage("Por favor complete todos los campos obligatorios.");
+          return false;
+        }
+
+        try {
+          // Petición PUT al backend con los datos editados
+          const res = await api.put(`usuarios/${id}`, {
+            names,
+            last_names,
+            document_type_id,
+            document_number,
+            birth_date,
+            gender_id,
+            phone,
+            organization_id,
+            email
+          });
+
+          if (res && res.success) {
+            return true;
+          } else {
+            Swal.showValidationMessage(res.message || "Error al actualizar los datos.");
+            return false;
+          }
+        } catch (err) {
+          Swal.showValidationMessage("Error de red: " + err.message);
+          return false;
+        }
+      }
+    }).then(async (result) => {
+      // Si el usuario confirmó exitosamente, recarga la vista
+      if (result.isConfirmed) {
+        await alertaOK("Datos actualizados con éxito.");
+        if (recargarContainer) await recargarContainer();
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    alertaError("Error al cargar formulario de edición.");
+  }
+};
+
 // de usuarios existentes que ya ingresaron a la plataforma.
 export const VerCambiarEstadoRolUsuarios = (
   htmlModal,
@@ -460,19 +663,47 @@ export const VerCambiarEstadoRolUsuarios = (
       denyButton: "botonHistorial"
     },
 
+    // DidOpen: capturamos eventos inyectados como el botón de edición personal
+    didOpen: () => {
+      const btnEdit = document.getElementById("btnEditarDatosPersonales");
+      if (btnEdit) {
+        btnEdit.onclick = async () => {
+          Swal.close(); // Cierra el modal de ficha detallada
+          await mostrarFormularioEdicionUsuario(id, recargarContainer);
+        };
+      }
+    },
+
     // 👉 CONFIRMAR (CAMBIAR ROL)
     preConfirm: async () => {
 
-      // Interfaz que pregunta si lo rebaja a voluntario o asciende a supervisor guiándose por el ID numérico
+      // Interfaz con selector de rol para elegir el nuevo rol del usuario
       const confirmacion = await Swal.fire({
-        title: `¿Seguro que deseas cambiar el rol de usuario a ${rol == 3 ? "Supervisor" : "Voluntario"}?`,
+        title: "Cambiar rol de usuario",
+        html: `
+          <p style="margin-bottom: 12px; font-family: var(--fuente-contenido);">Seleccione el nuevo rol para el usuario:</p>
+          <div class="input" style="max-width: 300px; margin: 0 auto;">
+            <div class="form__inputBox form__inputBox--selector">
+              <i class="ri-shield-user-line"></i>
+              <select class="selector" id="selectRolCambio">
+                <option value="1" ${rol == 1 ? "selected" : ""}>Voluntario</option>
+                <option value="2" ${rol == 2 ? "selected" : ""}>Supervisor</option>
+              </select>
+            </div>
+          </div>
+        `,
         icon: "question",
         showCancelButton: true,
-        confirmButtonText: "Sí",
+        confirmButtonText: "Sí, cambiar",
         cancelButtonText: "Cancelar",
         customClass: {
           confirmButton: 'botonOK',
           cancelButton: 'botonEliminar',
+        },
+        // Captura el valor del select antes de cerrarse
+        preConfirm: () => {
+          const rolSeleccionado = document.getElementById("selectRolCambio").value;
+          return { rol_id: Number(rolSeleccionado) };
         }
       });
 
@@ -482,10 +713,10 @@ export const VerCambiarEstadoRolUsuarios = (
       try {
 
         const datos = {
-          role: rol == 3 ? "Supervisor" : "Voluntario",
+          role: confirmacion.value.rol_id == 1 ? "Voluntario" : "Supervisor",
         };
 
-        const response = await api.patch(`users/role/${id}`, datos);
+        const response = await api.patch(`usuarios/rol/${id}`, datos);
 
         if (response.success) {
           await alertaOK(response.message);
@@ -506,7 +737,7 @@ export const VerCambiarEstadoRolUsuarios = (
 
     // 👉 HISTORIAL
     if (result.isDenied) {
-      Historial("users", id);
+      Historial("usuarios", id);
       return;
     }
 
@@ -529,7 +760,7 @@ export const VerCambiarEstadoRolUsuarios = (
 
       try {
         // Ejecución invirtiendo el id referencial (Si era 1[Activo] lo vuelve 2[Inactivo])
-        const response = await api.patch(`users/${id}/change-status`, {
+        const response = await api.patch(`usuarios/${id}/cambiar-estado`, {
           user_ids: [Number(id)], 
           state_user_id: estado == 1 ? 2 : 1,
           async: false,

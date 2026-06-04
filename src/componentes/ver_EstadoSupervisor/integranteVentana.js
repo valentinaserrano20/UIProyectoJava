@@ -245,7 +245,10 @@ const integranteVentana = async (miembro, relacion, info) =>{
     
     contenidoVentana.append(nombreApellidoCont, relacionCont, documentosCont, fechaNacimientoCont, generoCont, nacionalidadCont, numeroTelefonoCont, epsCont, afeccionesCont, tipoSangreCont);
     
-    if (info.status_plan_id !== 6 && info.status_plan_id !== 7) {
+    // Qué hace: Muestra el botón de editar integrante únicamente si el plan está en estado Enviado (1).
+    // Por qué existe: Si el plan ya está aprobado, rechazado o devuelto al voluntario, el supervisor no debe editar integrantes.
+    // Qué problema resuelve: Impide ediciones no autorizadas fuera del flujo normal de revisión de planes.
+    if (info.status_plan_id === 1) {
         ventana.append(btnCerrarCont, contenidoVentana, btnEditar);
     } else {
         ventana.append(btnCerrarCont, contenidoVentana);

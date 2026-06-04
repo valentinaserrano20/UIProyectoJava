@@ -37,7 +37,7 @@ export const tarjetaEstados = async (info) => {
     iconoRol.classList.add('ri-user-line');
     const textoRol = document.createElement('p');
     textoRol.classList.add('valor__rol');
-    textoRol.textContent = `Rol: Voluntario`;
+    textoRol.textContent = `Rol: ${info.rol || 'Voluntario'}`;
     itemRol.append(iconoRol, textoRol);
 
     // Sub-hijo: Seccional
@@ -77,8 +77,17 @@ export const tarjetaEstados = async (info) => {
     const tarjetaEstado = document.createElement('div');
     tarjetaEstado.classList.add('tarjeta__estado');
     const tarjetaBadge = document.createElement('span');
-    tarjetaBadge.classList.add('badge', 'badge--completado');
-    tarjetaBadge.textContent = 'Activo';
+    
+    // Determinar clase según el estado para colorear correctamente
+    let claseBadge = 'badge--completado'; // Verde por defecto para Activo
+    if (info.status === 'Inactivo') {
+        claseBadge = 'badge--rechazado'; // Rojo para Inactivo
+    } else if (info.status === 'Pendiente') {
+        claseBadge = 'badge--pendiente'; // Naranja para Pendiente
+    }
+    
+    tarjetaBadge.classList.add('badge', claseBadge);
+    tarjetaBadge.textContent = info.status || 'Activo';
     tarjetaEstado.append(tarjetaBadge);
 
 

@@ -47,7 +47,7 @@
                 </div>
             </a>
             
-            <a href="#/usuario/perfil" class="sidebar__link sidebar__link--perfil" id="menuPerfil">
+            <a href="#/usuarios/perfil" class="sidebar__link sidebar__link--perfil" id="menuPerfil">
                 <i class="ri-user-line icono__grande icono__grande--perfil"></i>
                 <div class="siderbar__oculto">
                     <p class="sidebar__texto" id="nombreUsuarioSidebar">Cargando...</p>
@@ -61,7 +61,7 @@
     <div class="dashboard-content">
         <!-- Encabezado con saludo dinámico según el perfil -->
         <section class="explicacion">
-            <p class="explicacion__titulo">Hola, </p>
+            <p class="explicacion__titulo">Bienvenido</p>
             <p class="explicacion__subtitulo">Bienvenido al panel de Control Unificado</p>
         </section>
 
@@ -76,9 +76,9 @@
                     <article class="seccion__tarjeta seccion__tarjeta--azul">
                         <i class="ri-file-2-line icono__tarjeta"></i>
                         <div class="seccion__tarjeta-contenido">
-                            <p class="tarjeta__header-texto">Planes Recibidos</p>
                             <span id="planesRecibidos" class="seccion__valor">0</span>
-                            <p class="seccion__detalle">Pendientes</p>
+                            <p class="tarjeta__header-texto">Planes Pendientes</p>
+                            <p class="seccion__detalle">Recibidos / Pendientes</p>
                         </div>
                     </article>
 
@@ -86,8 +86,8 @@
                     <article class="seccion__tarjeta seccion__tarjeta--amarillo">
                         <i class="ri-time-line icono__tarjeta"></i>
                         <div class="seccion__tarjeta-contenido">
-                            <p class="tarjeta__header-texto">Planes Recibidos</p>
                             <span id="planesEnRevision" class="seccion__valor">0</span>
+                            <p class="tarjeta__header-texto">Planes en Proceso</p>
                             <p class="seccion__detalle">En revisión</p>
                         </div>
                     </article>
@@ -96,8 +96,8 @@
                     <article class="seccion__tarjeta seccion__tarjeta--verde">
                         <i class="ri-checkbox-circle-line icono__tarjeta"></i>
                         <div class="seccion__tarjeta-contenido">
-                            <p class="tarjeta__header-texto">Planes Recibidos</p>
                             <span id="planesAprobados" class="seccion__valor">0</span>
+                            <p class="tarjeta__header-texto">Planes Aprobados</p>
                             <p class="seccion__detalle">Aprobados</p>
                         </div>
                     </article>
@@ -106,9 +106,9 @@
                     <article class="seccion__tarjeta seccion__tarjeta--rojo">
                         <i class="ri-close-circle-line icono__tarjeta"></i>
                         <div class="seccion__tarjeta-contenido">
-                            <p class="tarjeta__header-texto">Planes Recibidos</p>
                             <span id="planesRechazados" class="seccion__valor">0</span>
-                            <p class="seccion__detalle">Rechazados</p>
+                            <p class="tarjeta__header-texto">Planes Rechazados</p>
+                            <p class="seccion__detalle">Rechazados / Devueltos</p>
                         </div>
                     </article>
                 </div>
@@ -122,8 +122,8 @@
                     <article class="seccion__tarjeta seccion__tarjeta--naranja">
                         <i class="ri-group-line icono__tarjeta"></i>
                         <div class="seccion__tarjeta-contenido">
-                            <p class="tarjeta__header-texto">Usuarios Sistema</p>
                             <span id="totalUsuarios" class="seccion__valor">0</span>
+                            <p class="tarjeta__header-texto">Censo Total</p>
                             <p class="seccion__detalle">Total Registrados</p>
                         </div>
                     </article>
@@ -132,8 +132,8 @@
                     <article class="seccion__tarjeta seccion__tarjeta--verde">
                         <i class="ri-checkbox-circle-line icono__tarjeta"></i>
                         <div class="seccion__tarjeta-contenido">
-                            <p class="tarjeta__header-texto">Usuarios Sistema</p>
                             <span id="activos" class="seccion__valor">0</span>
+                            <p class="tarjeta__header-texto">Cuentas Activas</p>
                             <p class="seccion__detalle">Activos</p>
                         </div>
                     </article>
@@ -142,8 +142,8 @@
                     <article class="seccion__tarjeta seccion__tarjeta--rojo">
                         <i class="ri-close-circle-line icono__tarjeta"></i>
                         <div class="seccion__tarjeta-contenido">
-                            <p class="tarjeta__header-texto">Usuarios Sistema</p>
                             <span id="inactivos" class="seccion__valor">0</span>
+                            <p class="tarjeta__header-texto">Cuentas Inactivas</p>
                             <p class="seccion__detalle">Inactivos</p>
                         </div>
                     </article>
@@ -152,9 +152,9 @@
                     <article class="seccion__tarjeta seccion__tarjeta--azul">
                         <i class="ri-user-community-line icono__tarjeta"></i>
                         <div class="seccion__tarjeta-contenido">
-                            <p class="tarjeta__header-texto">Usuarios Sistema</p>
                             <span id="voluntarios" class="seccion__valor">0</span>
-                            <p class="seccion__detalle">Voluntarios</p>
+                            <p class="tarjeta__header-texto">Total Voluntarios</p>
+                            <p class="seccion__detalle">Voluntarios Activos</p>
                         </div>
                     </article>
                 </div>
@@ -168,7 +168,7 @@
             <!-- Historial de cambios en usuarios (Auditoría) -->
             <div class="dashBoard__container dashboard-audit-container">
                 <div class="ventanaHistorial w-100">
-                    <div class="ventanaHistorial__titulo">Historial cambios en usuarios</div>
+                    <div class="ventanaHistorial__titulo">Historial de Cambios en Usuarios</div>
                     <div id="usuariosHistorial" class="ventanaHistorial__contenido dashboard-audit-scroll"></div>
                 </div>
             </div>
@@ -176,7 +176,7 @@
             <!-- Historial de cambios en Datos Maestros (Auditoría) -->
             <div class="dashBoard__container dashboard-audit-container">
                 <div class="ventanaHistorial w-100">
-                    <div class="ventanaHistorial__titulo"> ● HISTORIAL DE CAMBIOS EN DATOS MAESTROS</div>
+                    <div class="ventanaHistorial__titulo">Historial de Cambios en Datos Maestros</div>
                     <div id="catalogoHistorial" class="ventanaHistorial__contenido dashboard-audit-scroll"></div>
                 </div>
             </div>

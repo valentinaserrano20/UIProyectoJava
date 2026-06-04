@@ -10,14 +10,30 @@ export const cardPlanFamiliar = (planFamiliar) => {
   // Qué hace: Asigna clases CSS de color según el estado del plan.
   // Por qué existe: Mapea los códigos del backend a colores consistentes (Azul = Enviado/En revisión, Verde = Aprobado, Rojo = Rechazos).
   // Qué problema resuelve: Corrige la inconsistencia donde planes rechazados (ID 4) se pintaban de verde en el frontend.
-  const estadoClase =
-    planFamiliar.status_id == 1 || planFamiliar.status_id == 3
-      ? "verPlan__estado--azul"
-      : planFamiliar.status_id == 7
-      ? "verPlan__estado--verde"
-      : planFamiliar.status_id == 4 || planFamiliar.status_id == 5 || planFamiliar.status_id == 6
-      ? "verPlan__estado--rojo"
-      : ""; // Sin clase (gris neutro) para Pendiente (2)
+  // Un plan se considera borrador/pendiente si su estado en la BD es 2 (Pendiente) o 3 (En revisión).
+  // Los demás estados (1: Enviado, 7: Aprobado, 4/5/6: Rechazados) corresponden a planes ya procesados o enviados,
+  // por lo que deben conservar su color y etiqueta correspondientes incluso si el tipo de familia no se ha guardado (ej. datos semilla).
+  const esBorrador = planFamiliar.status_id == 2 || planFamiliar.status_id == 3;
+
+  const estadoClase = esBorrador
+    ? "" // Gris/Neutro para planes en borrador o incompletos (Pendiente)
+    : planFamiliar.status_id == 1
+    ? "verPlan__estado--azul"
+    : planFamiliar.status_id == 7
+    ? "verPlan__estado--verde"
+    : planFamiliar.status_id == 4 || planFamiliar.status_id == 5 || planFamiliar.status_id == 6
+    ? "verPlan__estado--rojo"
+    : "";
+
+  // -------------------------------------------------------------
+  // TRADUCCIÓN O SIMPLIFICACIÓN DE TEXTOS DE ESTADO PARA EL VOLUNTARIO
+  // -------------------------------------------------------------
+  // Qué hace: Ajusta el texto del estado mostrado en la tarjeta para el voluntario.
+  // Por qué existe: El estado 3 en base de datos es 'En revisión' pero lógicamente el plan sigue pendiente de envío.
+  // Qué problema resuelve: Evita que el voluntario piense que su plan ya está con el supervisor antes de darle clic a enviar.
+  const estadoTexto = esBorrador
+    ? "Pendiente"
+    : planFamiliar.status;
 
   const tipoClase = planFamiliar.family_type_id == 1 ? "verPlan__tipo--rojo" : planFamiliar.family_type_id == 2 ? "verPlan__tipo--verde" : "verPlan__tipo--gris";
   // Override Label Texto para Rechazos (El backend tal vez manda textos largos, front los recorta)
@@ -36,7 +52,7 @@ export const cardPlanFamiliar = (planFamiliar) => {
         <div class="verPlan__tipo--estado">
 
         <div class="verPlan__estado ${estadoClase}">
-            ${planFamiliar.status}
+            ${estadoTexto}
         </div>
 
         <div class="verPlan__tipo ${tipoClase}">
@@ -55,17 +71,17 @@ export const cardPlanFamiliar = (planFamiliar) => {
         </div>
         ${
           // -------------------------------------------------------------
-          // RESTRICCIÓN DE VISIBILIDAD DEL BOTÓN "REVISAR PLAN"
+          // RESTRICCIÓN DE VISIBILIDAD DEL BOTÓN / MENSAJE DEL PLAN
           // -------------------------------------------------------------
-          // Qué hace: Condiciona la renderización del botón "Revisar Plan".
-          // Por qué existe: Solo permite que el voluntario modifique planes en progreso (Pendiente: 2) o devueltos para corrección (Rechazado con observaciones: 5).
-          // Qué problema resuelve: Oculta el botón cuando el plan ya ha sido enviado, está en revisión, o está rechazado definitivamente.
-          planFamiliar.status_id == 2 || planFamiliar.status_id == 5
+          // Qué hace: Renderiza el botón "Continuar con el plan" solo para planes editables (2, 3, 5).
+          // Por qué existe: Habilita la edición para planes en borrador o devueltos, y oculta completamente los botones para planes cerrados (1, 4, 6, 7).
+          // Qué problema resuelve: Impide que el voluntario intente continuar, abrir o enviar planes que ya están aprobados, rechazados o enviados.
+          planFamiliar.status_id == 2 || planFamiliar.status_id == 3 || planFamiliar.status_id == 5
             ? `<button class="verPlan__boton boton" 
                             data-id="${planFamiliar.id}" 
                             data-status="${planFamiliar.status_id}"
                             data-family-type-id="${planFamiliar.family_type_id}">
-                        Revisar Plan
+                        Continuar con el plan
                     </button>`
             : ""
         }

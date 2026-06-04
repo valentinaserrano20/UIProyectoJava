@@ -28,6 +28,7 @@
 @import "./components/ventanaHistorial.css";
 @import "./components/tarjeta.css";
 @import "./components/seccion.css";
+@import "./components/sidebar.css";
 @import "./components/dashboard.css";
 @import "./components/error.css";
 @import "./components/banner.css";
@@ -37,7 +38,6 @@
 @import "./components/spinner.css";
 @import "./components/verEstadoVentana.css";
 @import "./components/tablas.css";
-@import "./components/sidebar.css";
 @import "./components/toggle.css";
 @import "./components/filters.css";
 /* pages */

@@ -104,7 +104,10 @@ const recursosVentana = async (recurso, info) => {
 
     contenidoVentana.append(nombreCont, servicioCont, telefonoCont, descripcionCont, distanciaCont)
 
-    if (info.status_plan_id !== 6 && info.status_plan_id !== 7) {
+    // Qué hace: Añade el botón de edición de recurso disponible únicamente si el plan está en estado Enviado (1).
+    // Por qué existe: Impide modificaciones por parte del supervisor una vez que el plan ya no está pendiente de evaluación.
+    // Qué problema resuelve: Restringe la acción de edición garantizando la coherencia de los datos históricos.
+    if (info.status_plan_id === 1) {
         ventana.append(btnCerrarCont, contenidoVentana, btnEditar);
     } else {
         ventana.append(btnCerrarCont, contenidoVentana);

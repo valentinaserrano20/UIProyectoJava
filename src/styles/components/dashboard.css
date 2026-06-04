@@ -167,12 +167,17 @@
 /* -------------------------------------------------------------
    SOBREESCRITURA DE LA CABECERA (HEADER) PARA EL APILAMIENTO
    ------------------------------------------------------------- */
-/* Qué hace: Define la posición relativa y un z-index superior para el header. */
-/* Por qué existe: Asegura que el header siempre esté posicionado por encima de la barra lateral y otros contenedores flotantes. */
-/* Qué problema resuelve: Evita que la barra lateral con posición fija o sus sombras se superpongan visualmente por encima del header. */
+/* Qué hace: Define la posición fija (fixed), z-index superior y ancho completo para el header. */
+/* Por qué existe: Mantiene el encabezado siempre anclado en la parte superior del viewport de forma inamovible. */
+/* Qué problema resuelve: Elimina el espacio en blanco de 75px que aparecía sobre la barra lateral (aside) al hacer scroll. */
 .header {
-    position: relative;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 75px !important;
     z-index: 101;
+    box-sizing: border-box;
 }
 
 /* -------------------------------------------------------------
@@ -193,60 +198,187 @@
 /* -------------------------------------------------------------
    POSICIONAMIENTO DE LA BARRA LATERAL (SIDEBAR) BAJO EL HEADER
    ------------------------------------------------------------- */
-/* Qué hace: Modifica la barra lateral del dashboard para que comience a 75px del borde superior con un alto dinámico y remueve los bordes redondeados izquierdos. */
 /* Por qué existe: Cumple con el requerimiento de diseño de ubicar el aside exactamente debajo del header de la aplicación. */
 /* Qué problema resuelve: Evita que el menú lateral tape el logotipo u otros accesos directos ubicados en el header. */
 .sidebar--dashboard {
     position: fixed;
     left: 0;
-    top: 75px !important;
+    top: 75px;
     bottom: 0;
     z-index: 99;
-    height: calc(100vh - 75px) !important;
+    height: calc(100vh - 75px);
     flex-shrink: 0;
     display: flex;
     box-shadow: 4px 0 15px rgba(0, 0, 0, 0.04);
-    border-radius: 0 !important;
-    background-color: #ffffff !important;
+    border-radius: 0;
+    background-color: #ffffff;
     border-right: 1px solid #e2e8f0;
-    padding: 1.5rem 1rem !important;
+    padding: 1.5rem 1rem;
+    overflow-y: auto; /* Permite scroll vertical si la pantalla tiene poca altura */
+    scrollbar-width: none; /* Oculta la barra de scroll en Firefox */
+}
+.sidebar--dashboard::-webkit-scrollbar {
+    display: none; /* Oculta la barra de scroll en Chrome, Safari y Edge */
 }
 
 /* -------------------------------------------------------------
-   ESTILOS DE TRANSICIONES Y ELEMENTOS DE ENLACE EN SIDEBAR
+   PERSONALIZACIÓN DESKTOP PREMIUM DE LA BARRA LATERAL (SIDEBAR)
    ------------------------------------------------------------- */
-/* Qué hace: Agrega bordes redondeados y transiciones suaves de color y escala a los enlaces dentro del menú lateral. */
-/* Por qué existe: Incrementa la interactividad de la barra de navegación brindando retroalimentación visual al usuario. */
-/* Qué problema resuelve: Elimina la tosquedad en la interacción y unifica los colores con la identidad visual corporativa. */
-.sidebar--dashboard .sidebar__link {
-    border-radius: 8px;
-    margin: 2px 0;
-    transition: all 0.2s ease-in-out;
-}
+@media screen and (min-width: 769px) {
+    /* Qué hace: Define el ancho auto-ajustable (max-content) para la barra lateral. */
+    /* Por qué existe: Permite que el ancho del menú dependa enteramente de la expansión animada de sus enlaces. */
+    /* Qué problema resuelve: Restaura la animación original donde el aside no tiene ancho fijo sino dinámico. */
+    .sidebar--dashboard {
+        width: max-content;
+        flex-direction: column;
+        padding: 24px 16px;
+        align-items: flex-start;
+    }
 
-/* Qué hace: Define el fondo gris claro y el texto azul corporativo al hacer hover sobre los enlaces del menú lateral. */
-/* Por qué existe: Destaca la opción sobre la cual el cursor del usuario está suspendido temporalmente. */
-/* Qué problema resuelve: Resuelve la falta de indicación visual clara de hover en la navegación del panel consolidado. */
-.sidebar--dashboard .sidebar__link:hover {
-    background-color: #f1f5f9;
-    color: #0770CC;
-}
+    /* Qué hace: Configura el listado de links en flex vertical con espacio intermedio de 8px. */
+    /* Por qué existe: Organiza de manera regular y vertical la pila de botones del menú. */
+    /* Qué problema resuelve: Homogeniza la distribución de enlaces. */
+    .sidebar--dashboard .sidebar__lista {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        height: 100%;
+    }
 
-/* Qué hace: Establece el color de fondo azul de la marca y texto blanco para el elemento seleccionado en el menú lateral. */
-/* Por qué existe: Denota de forma inmediata en qué sección o módulo del panel se encuentra navegando el usuario. */
-/* Qué problema resuelve: Evita la desorientación espacial del usuario al interactuar con las pestañas del dashboard. */
-.sidebar--dashboard .sidebar__link--active {
-    background-color: #0770CC !important;
-    color: #ffffff !important;
-    border-radius: var(--border-radius-botones);
-}
+    /* Qué hace: Modifica los enlaces de menú para usar grid con transiciones suaves en las columnas. */
+    /* Por qué existe: Oculta el texto en estado de reposo y lo expande suavemente en hover. */
+    /* Qué problema resuelve: Une la animación del grid colapsable con los nuevos estilos y paddings consistentes. */
+    .sidebar--dashboard .sidebar__link {
+        display: grid;
+        grid-template-columns: 32px 0fr;
+        align-items: center;
+        gap: 0px;
+        padding: 10px 14px;
+        box-sizing: border-box;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1), gap 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, color 0.2s;
+    }
 
-/* Qué hace: Fuerza a que los iconos y textos del enlace activo mantengan la coloración blanca. */
-/* Por qué existe: Asegura el contraste correcto y legibilidad de los elementos dentro del botón activo. */
-/* Qué problema resuelve: Corrige discrepancias de color heredadas de clases de estilos globales. */
-.sidebar--dashboard .sidebar__link--active i,
-.sidebar--dashboard .sidebar__link--active p {
-    color: #ffffff !important;
+    /* Qué hace: Transiciona las columnas de los links a 32px y 1fr cuando la barra lateral se expande. */
+    /* Por qué existe: Revela el texto de los enlaces de manera sincronizada con el ensanchamiento del menú. */
+    /* Qué problema resuelve: Evita desbordes y cortes toscos del texto al expandirse. */
+    .sidebar--dashboard:hover .sidebar__link {
+        grid-template-columns: 32px 1fr;
+        gap: 12px;
+    }
+
+    /* Qué hace: Controla la visibilidad y transición de opacidad del texto del menú. */
+    /* Por qué existe: Hace que los nombres de las secciones aparezcan de forma suave con un efecto fundido. */
+    /* Qué problema resuelve: Elimina la tosquedad del texto apareciendo de golpe durante la animación física del aside. */
+    .sidebar--dashboard .siderbar__oculto {
+        overflow: hidden;
+        display: block;
+        transition: opacity 0.2s ease;
+    }
+    .sidebar--dashboard:not(:hover) .siderbar__oculto {
+        opacity: 0;
+    }
+    .sidebar--dashboard:hover .siderbar__oculto {
+        opacity: 1;
+    }
+
+    /* Qué hace: Estiliza las etiquetas de texto del menú a tamaño medio y peso seminegrita. */
+    /* Por qué existe: Aumenta la jerarquía tipográfica para facilitar la legibilidad rápida. */
+    /* Qué problema resuelve: Remueve las fuentes sobredimensionadas del menú colapsable original. */
+    .sidebar--dashboard .sidebar__texto {
+        font-family: var(--fuente-titulos);
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 0;
+        color: inherit;
+    }
+
+    /* Qué hace: Redimensiona el icono del menú a 20px y le añade fondo redondeado. */
+    /* Por qué existe: Consigue simetría visual con los textos y asocia un área de clic agradable. */
+    /* Qué problema resuelve: Reduce el tamaño de los iconos gigantes originales. */
+    .sidebar--dashboard .icono__grande {
+        font-size: 1.15rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+    }
+
+    /* Qué hace: Destaca el enlace activo con fondo azul de marca. */
+    /* Por qué existe: Enfatiza la pestaña en la que se encuentra posicionado el usuario. */
+    /* Qué problema resuelve: Ofrece una retroalimentación de ubicación clara. */
+    .sidebar--dashboard .sidebar__link--active {
+        background-color: var(--color-secundario);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(7, 112, 204, 0.2);
+    }
+    .sidebar--dashboard .sidebar__link--active .icono__grande {
+        color: #ffffff;
+        background-color: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Qué hace: Configura los enlaces inactivos del menú con color gris slate. */
+    /* Por qué existe: Mantiene los elementos secundarios de forma discreta para evitar ruido visual. */
+    /* Qué problema resuelve: Unifica las fuentes de navegación inactivas. */
+    .sidebar--dashboard .sidebar__link:not(.sidebar__link--active) {
+        color: #64748b;
+        border-left: 3px solid transparent;
+    }
+
+    /* Qué hace: Realiza un micro-desplazamiento lateral y destaca en azul al hacer hover en enlaces inactivos. */
+    /* Por qué existe: Genera retroalimentación interactiva tridimensional. */
+    /* Qué problema resuelve: Dinamiza la barra lateral de navegación. */
+    .sidebar--dashboard .sidebar__link:not(.sidebar__link--active):hover {
+        background-color: #f1f5f9;
+        color: var(--color-secundario);
+        border-left: 3px solid var(--color-secundario);
+    }
+    .sidebar--dashboard .sidebar__link:not(.sidebar__link--active):hover .icono__grande {
+        color: var(--color-secundario);
+        background-color: var(--color-fondoazultranslucido);
+    }
+
+    /* Qué hace: Rediseña la sección de perfil en la parte inferior como una tarjeta premium con animación de columnas. */
+    /* Por qué existe: Mantiene la consistencia del perfil colapsado y muestra el nombre/rol solo al expandirse. */
+    /* Qué problema resuelve: Integra el avatar redondo en reposo e incorpora los detalles de usuario de forma fluida. */
+    .sidebar--dashboard .sidebar__link--perfil {
+        margin-top: auto;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+        padding: 12px;
+        border-radius: 12px;
+        display: grid;
+        grid-template-columns: 38px 0fr;
+        gap: 0px;
+        box-sizing: border-box;
+        transition: grid-template-columns 0.3s cubic-bezier(0.4, 0, 0.2, 1), gap 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s, border-color 0.2s;
+    }
+    .sidebar--dashboard:hover .sidebar__link--perfil {
+        grid-template-columns: 38px 1fr;
+        gap: 12px;
+    }
+    .sidebar--dashboard .sidebar__link--perfil:hover {
+        background-color: #f1f5f9;
+        border-color: #cbd5e1;
+    }
+    .sidebar--dashboard .icono__grande--perfil {
+        background-color: var(--color-fondoazultranslucido);
+        color: var(--color-secundario);
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+    }
+    .sidebar--dashboard .sidebar__info {
+        font-size: 0.725rem;
+        color: #64748b;
+        margin: 2px 0 0 0;
+        font-weight: 500;
+        display: block;
+    }
 }
 
 /* -------------------------------------------------------------
@@ -257,32 +389,35 @@
 /* Qué problema resuelve: Evita la superposición destructiva de la barra lateral sobre la información y los controles del dashboard. */
 .dashboard-content {
     flex: 1;
-    margin-left: 95px; /* ancho de la sidebar colapsada */
     padding: 30px;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 25px;
-    width: calc(100% - 95px);
 }
 
+@media screen and (min-width: 769px) {
+    /* Qué hace: Asigna un margen de 95px al contenido en escritorio. */
+    /* Por qué existe: Alinea el contenido con el ancho colapsado de la barra lateral. */
+    /* Qué problema resuelve: Permite que el aside se expanda encima del contenido como capa superpuesta sin desplazar el resto de la página. */
+    .dashboard-content {
+        margin-left: 95px !important;
+    }
+}
 /* -------------------------------------------------------------
    REDISEÑO VISUAL DE LAS TARJETAS DE MÉTRICAS (ESTILO PREMIUM)
    ------------------------------------------------------------- */
-/* Qué hace: Rediseña las tarjetas de métricas para usar fondo blanco, bordes finos, alineación izquierda y sombras suaves. */
-/* Por qué existe: Transiciona la interfaz de colores planos y saturados a un estilo minimalista, moderno y profesional. */
-/* Qué problema resuelve: Soluciona la saturación visual excesiva y el cansancio ocular provocado por fondos de color sólido. */
+/* Qué hace: Rediseña las tarjetas de métricas para usar un contenedor flexible, bordes redondeados y transiciones fluidas. */
+/* Por qué existe: Establece el esqueleto estructural base para las tarjetas estadísticas del panel. */
+/* Qué problema resuelve: Homogeniza las dimensiones y márgenes de los indicadores cuantitativos. */
 .dashboard-content .seccion__tarjeta {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 20px 24px;
+    border-radius: 16px;
+    padding: 24px;
     display: flex;
     align-items: center;
     justify-content: flex-start;
     text-align: left;
     gap: 20px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -290,161 +425,175 @@
     box-sizing: border-box;
 }
 
-/* Qué hace: Genera una barra lateral de color (indicadora de estado) en el borde izquierdo de la tarjeta. */
-/* Por qué existe: Aporta una pista visual rápida del significado del estado (Ej: verde aprobado, rojo rechazado) sin saturar todo el fondo. */
-/* Qué problema resuelve: Permite categorizar la importancia de los datos en pantalla manteniendo la sobriedad del diseño general. */
+/* Qué hace: Remueve las barras laterales de colores del diseño original. */
+/* Por qué existe: Evita saturar el lado izquierdo del bloque con líneas toscas de color sólido. */
+/* Qué problema resuelve: Limpia el área perimetral de la tarjeta para favorecer un aspecto premium. */
 .dashboard-content .seccion__tarjeta::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 5px;
-    transition: all 0.3s ease;
+    display: none;
 }
 
-/* Qué hace: Implementa un efecto de elevación y aumento de sombra al posicionar el cursor sobre la tarjeta. */
-/* Por qué existe: Transmite al usuario la sensación de que el elemento es interactivo y reacciona a sus acciones. */
-/* Qué problema resuelve: Elimina la rigidez y falta de dinamismo visual de las tarjetas del panel. */
+/* Qué hace: Aplica una pequeña elevación física (desplazamiento vertical) al posicionar el cursor sobre la tarjeta. */
+/* Por qué existe: Agrega dinamismo tridimensional interactivo al interactuar con las métricas. */
+/* Qué problema resuelve: Rompe el estatismo de las tarjetas del censo general. */
 .dashboard-content .seccion__tarjeta:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-    border-color: #cbd5e1;
+    transform: translateY(-4px);
 }
 
-/* Qué hace: Define el color azul para la barra indicadora de la tarjeta azul. */
-/* Por qué existe: Asocia visualmente la tarjeta de datos pendientes con el color representativo del flujo. */
-/* Qué problema resuelve: Garantiza consistencia cromática según la semántica de la información mostrada. */
-.dashboard-content .seccion__tarjeta--azul::before { background-color: #3b82f6; }
+/* Configuración Específica de Colores y Sombras por Categoría (Estilo Premium) */
 
-/* Qué hace: Define el color amarillo para la barra indicadora de la tarjeta amarilla. */
-/* Por qué existe: Asocia visualmente la tarjeta de datos en revisión con el color de advertencia o espera. */
-/* Qué problema resuelve: Identifica rápidamente el estado de revisión en progreso. */
-.dashboard-content .seccion__tarjeta--amarillo::before { background-color: #f59e0b; }
+/* Qué hace: Define el fondo degradado y borde sutil azul para planes recibidos/voluntarios. */
+/* Por qué existe: Identifica la categoría de información de forma discreta y fresca. */
+/* Qué problema resuelve: Sustituye el fondo plano por un degradado suave y acentúa el color al hacer hover. */
+.dashboard-content .seccion__tarjeta--azul {
+    background: linear-gradient(135deg, #ffffff 0%, #f7faff 100%);
+    border: 1px solid rgba(7, 112, 204, 0.15);
+}
+.dashboard-content .seccion__tarjeta--azul:hover {
+    border-color: rgba(7, 112, 204, 0.45);
+    box-shadow: 0 12px 20px -8px rgba(7, 112, 204, 0.18), 0 8px 10px -6px rgba(7, 112, 204, 0.12);
+}
 
-/* Qué hace: Define el color verde para la barra indicadora de la tarjeta verde. */
-/* Por qué existe: Asocia visualmente la tarjeta de datos aprobados/activos con el color del éxito o habilitación. */
-/* Qué problema resuelve: Permite destacar a primer golpe de vista las métricas satisfactorias del sistema. */
-.dashboard-content .seccion__tarjeta--verde::before { background-color: #10b981; }
+/* Qué hace: Define el fondo degradado y borde sutil amarillo para planes en revisión. */
+/* Por qué existe: Aporta una tonalidad de advertencia refinada para procesos en curso. */
+/* Qué problema resuelve: Destaca los procesos pendientes de finalización sin saturar. */
+.dashboard-content .seccion__tarjeta--amarillo {
+    background: linear-gradient(135deg, #ffffff 0%, #fffdf5 100%);
+    border: 1px solid rgba(241, 177, 0, 0.15);
+}
+.dashboard-content .seccion__tarjeta--amarillo:hover {
+    border-color: rgba(241, 177, 0, 0.45);
+    box-shadow: 0 12px 20px -8px rgba(241, 177, 0, 0.18), 0 8px 10px -6px rgba(241, 177, 0, 0.12);
+}
 
-/* Qué hace: Define el color rojo para la barra indicadora de la tarjeta roja. */
-/* Por qué existe: Asocia visualmente la tarjeta de datos rechazados/inactivos con el color de parada o error. */
-/* Qué problema resuelve: Alerta inmediatamente sobre anomalías o elementos inactivos que requieren atención. */
-.dashboard-content .seccion__tarjeta--rojo::before { background-color: #ef4444; }
+/* Qué hace: Define el fondo degradado y borde sutil verde para cuentas y planes aprobados. */
+/* Por qué existe: Enfatiza los elementos aprobados o activos del sistema de forma positiva. */
+/* Qué problema resuelve: Enlaza visualmente el éxito de forma sutil en hover. */
+.dashboard-content .seccion__tarjeta--verde {
+    background: linear-gradient(135deg, #ffffff 0%, #f6fdf6 100%);
+    border: 1px solid rgba(54, 189, 54, 0.15);
+}
+.dashboard-content .seccion__tarjeta--verde:hover {
+    border-color: rgba(54, 189, 54, 0.45);
+    box-shadow: 0 12px 20px -8px rgba(54, 189, 54, 0.18), 0 8px 10px -6px rgba(54, 189, 54, 0.12);
+}
 
-/* Qué hace: Define el color naranja para la barra indicadora de la tarjeta naranja. */
-/* Por qué existe: Asocia visualmente la tarjeta de usuarios registrados totales con el color primario de la marca. */
-/* Qué problema resuelve: Enmarca el total del censo de usuarios con un color corporativo neutro pero llamativo. */
-.dashboard-content .seccion__tarjeta--naranja::before { background-color: #f97316; }
+/* Qué hace: Define el fondo degradado y borde sutil rojo para planes rechazados y cuentas inactivas. */
+/* Por qué existe: Llama la atención discretamente sobre discrepancias o estados de error. */
+/* Qué problema resuelve: Advierte sobre los rechazos con una sombra difuminada y un borde más visible. */
+.dashboard-content .seccion__tarjeta--rojo {
+    background: linear-gradient(135deg, #ffffff 0%, #fffafb 100%);
+    border: 1px solid rgba(216, 0, 0, 0.12);
+}
+.dashboard-content .seccion__tarjeta--rojo:hover {
+    border-color: rgba(216, 0, 0, 0.35);
+    box-shadow: 0 12px 20px -8px rgba(216, 0, 0, 0.15), 0 8px 10px -6px rgba(216, 0, 0, 0.1);
+}
 
-/* Qué hace: Configura un tono de texto gris slate oscuro por defecto para los contenidos de las tarjetas. */
-/* Por qué existe: Asegura que todos los textos interiores de la tarjeta contrasten perfectamente con el fondo blanco. */
-/* Qué problema resuelve: Evita problemas de accesibilidad por falta de contraste en las descripciones de las tarjetas. */
+/* Qué hace: Define el fondo degradado y borde sutil naranja para el censo total de la plataforma. */
+/* Por qué existe: Representa la identidad corporativa de la marca principal en el total general. */
+/* Qué problema resuelve: Otorga un brillo naranja elegante al interactuar con el total global. */
+.dashboard-content .seccion__tarjeta--naranja {
+    background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%);
+    border: 1px solid rgba(255, 102, 0, 0.15);
+}
+.dashboard-content .seccion__tarjeta--naranja:hover {
+    border-color: rgba(255, 102, 0, 0.45);
+    box-shadow: 0 12px 20px -8px rgba(255, 102, 0, 0.18), 0 8px 10px -6px rgba(255, 102, 0, 0.12);
+}
+
+/* Configuración de Textos */
 .dashboard-content .seccion__tarjeta {
     color: #334155;
 }
 
-/* Qué hace: Da formato de tamaño de fuente pequeño, mayúsculas y color gris slate medio a la etiqueta del encabezado de la tarjeta. */
-/* Por qué existe: Establece una jerarquía visual clara, haciendo que la categoría del dato sea legible pero discreta. */
-/* Qué problema resuelve: Evita la competencia visual de textos de diferente índole dentro de un mismo contenedor. */
+/* Qué hace: Estiliza la etiqueta del título interno de la métrica en mayúsculas pequeñas. */
+/* Por qué existe: Organiza de forma discreta la jerarquía visual de la tarjeta. */
+/* Qué problema resuelve: Previene que la etiqueta compita con el número de la métrica. */
 .dashboard-content .tarjeta__header-texto {
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #64748b;
-    font-weight: 600;
-    margin: 0;
-}
-
-/* Qué hace: Amplía el tamaño del número principal de la métrica a 2rem con fuente pesada en color gris carbón. */
-/* Por qué existe: Destaca la cifra cuantitativa como el elemento de mayor importancia de la tarjeta. */
-/* Qué problema resuelve: Facilita la obtención rápida de los indicadores numéricos del sistema. */
-.dashboard-content .seccion__valor {
-    font-size: 2rem;
     font-weight: 700;
-    color: #1e293b;
-    line-height: 1.1;
-    margin: 4px 0;
-    display: block;
+    margin: 4px 0 0 0;
 }
 
-/* Qué hace: Estiliza la etiqueta de detalle inferior de la tarjeta con tamaño mediano y tono gris slate. */
-/* Por qué existe: Agrega información contextual secundaria debajo del número de la métrica. */
-/* Qué problema resuelve: Brinda coherencia y explicación directa sobre qué representa la cifra mostrada. */
-.dashboard-content .seccion__detalle {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: #475569;
+/* Qué hace: Aplica un tamaño de 2.25rem y peso ultra-bold al número principal. */
+/* Por qué existe: Resalta el indicador cuantitativo como el dato primario de la tarjeta. */
+/* Qué problema resuelve: Facilita el escaneo rápido del volumen de datos del censo. */
+.dashboard-content .seccion__valor {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
     margin: 0;
+    display: block;
+    letter-spacing: -0.03em;
 }
 
-/* Qué hace: Configura el tamaño y espaciado del icono, encerrándolo en un marco con bordes redondeados y centrados. */
-/* Por qué existe: Crea un marco visual simétrico para alojar el icono identificador de la tarjeta. */
-/* Qué problema resuelve: Elimina la asimetría y el escalado desigual de los iconos. */
+/* Qué hace: Estiliza la descripción secundaria de la tarjeta con tono suave y tamaño 0.8rem. */
+/* Por qué existe: Brinda contexto aclaratorio final de forma complementaria. */
+/* Qué problema resuelve: Ofrece explicaciones adicionales sin sobrecargar visualmente. */
+.dashboard-content .seccion__detalle {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #94a3b8;
+    margin: 2px 0 0 0;
+}
+
+/* Iconos de las Tarjetas */
+/* Qué hace: Diseña el círculo del icono como un círculo perfectamente redondo. */
+/* Por qué existe: Unifica la geometría de los iconos circulares del dashboard dándole simetría. */
+/* Qué problema resuelve: Quita la asimetría e irregularidades del padding del icono. */
 .dashboard-content .seccion__tarjeta .icono__tarjeta {
     font-size: 24px;
-    padding: 12px;
-    border-radius: 10px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
 }
 
-/* Qué hace: Define el fondo azul claro translúcido e icono azul fuerte para las tarjetas azules. */
-/* Por qué existe: Da identidad cromática al icono correspondiente para acentuar el diseño premium. */
-/* Qué problema resuelve: Elimina los colores de fondo planos y opacos en los iconos. */
+/* Colores de Iconos por Categoría */
 .dashboard-content .seccion__tarjeta--azul .icono__tarjeta {
     background-color: #eff6ff;
     color: #2563eb;
 }
 
-/* Qué hace: Define el fondo amarillo claro translúcido e icono ámbar fuerte para las tarjetas amarillas. */
-/* Por qué existe: Genera armonía visual con la barra indicadora amarilla del borde. */
-/* Qué problema resuelve: Acentúa el diseño premium del bloque mediante un balance tonal adecuado. */
 .dashboard-content .seccion__tarjeta--amarillo .icono__tarjeta {
     background-color: #fffbeb;
     color: #d97706;
 }
 
-/* Qué hace: Define el fondo verde claro translúcido e icono verde fuerte para las tarjetas verdes. */
-/* Por qué existe: Genera armonía visual con la barra indicadora verde del borde. */
-/* Qué problema resuelve: Acentúa el diseño premium de aprobación/activación. */
 .dashboard-content .seccion__tarjeta--verde .icono__tarjeta {
     background-color: #ecfdf5;
     color: #059669;
 }
 
-/* Qué hace: Define el fondo rojo claro translúcido e icono rojo fuerte para las tarjetas rojas. */
-/* Por qué existe: Genera armonía visual con la barra indicadora roja de rechazos/inactividad. */
-/* Qué problema resuelve: Enfatiza la advertencia del estado con elegancia. */
 .dashboard-content .seccion__tarjeta--rojo .icono__tarjeta {
     background-color: #fef2f2;
     color: #dc2626;
 }
 
-/* Qué hace: Define el fondo naranja claro translúcido e icono naranja fuerte para las tarjetas naranjas. */
-/* Por qué existe: Genera armonía visual con la barra indicadora naranja de totales. */
-/* Qué problema resuelve: Brinda elegancia al bloque del censo general. */
 .dashboard-content .seccion__tarjeta--naranja .icono__tarjeta {
     background-color: #fff7ed;
     color: #ea580c;
 }
 
-/* Qué hace: Aplica un micro-escalado al icono cuando el cursor sobrevuele la tarjeta completa. */
-/* Por qué existe: Enriquece la interfaz con animaciones sutiles y elegantes al interactuar. */
-/* Qué problema resuelve: Resuelve la inercia estática de las tarjetas del dashboard. */
+/* Qué hace: Modifica la escala y aplica una ligera rotación al icono al posar el cursor sobre la tarjeta. */
+/* Por qué existe: Añade una sutil micro-animación lúdica al interactuar. */
+/* Qué problema resuelve: Añade fluidez e interactividad premium. */
 .dashboard-content .seccion__tarjeta:hover .icono__tarjeta {
-    transform: scale(1.1);
+    transform: scale(1.08) rotate(6deg);
 }
 
 /* -------------------------------------------------------------
    DISTRIBUCIÓN GRÁFICA DE LAS MÉTRICAS UNIFICADAS
    ------------------------------------------------------------- */
-/* Qué hace: Crea una cuadrícula de dos columnas del mismo tamaño para organizar los estados de planes y usuarios. */
-/* Por qué existe: Muestra los dos dominios principales del sistema en paralelo a la misma altura. */
-/* Qué problema resuelve: Corrige la asimetría de diseño alineando las cajas de planes y usuarios a la misma línea base. */
 .dashboard-metrics-wrapper {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -452,9 +601,6 @@
     width: 100%;
 }
 
-/* Qué hace: Define cada columna del dashboard de métricas con dirección vertical y espacio interior consistente. */
-/* Por qué existe: Organiza el título y la cuadrícula interna de tarjetas dentro de cada área temática. */
-/* Qué problema resuelve: Mantiene la consistencia del flujo vertical de elementos en la sección superior del panel. */
 .dashboard-metrics-column {
     display: flex;
     flex-direction: column;
@@ -462,9 +608,6 @@
     width: 100%;
 }
 
-/* Qué hace: Genera una rejilla de 2x2 para las cuatro tarjetas de estado dentro de cada módulo. */
-/* Por qué existe: Permite un despliegue simétrico y ordenado de los 4 indicadores numéricos de planes y usuarios. */
-/* Qué problema resuelve: Organiza los contadores en un patrón de cuadrícula uniforme que optimiza el espacio horizontal. */
 .dashboard-metrics-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -475,9 +618,6 @@
 /* -------------------------------------------------------------
    ESTRUCTURA DE AUDITORÍAS E HISTORIALES
    ------------------------------------------------------------- */
-/* Qué hace: Define el grid de dos columnas para los historiales de cambios de usuarios y de catálogos generales. */
-/* Por qué existe: Expone las tablas de logs lado a lado para una cómoda inspección simultánea de la base de datos. */
-/* Qué problema resuelve: Reemplaza las columnas apiladas verticalmente por una visualización horizontal limpia en monitores grandes. */
 .dashboard-grid-audits {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -485,38 +625,38 @@
     width: 100%;
 }
 
-/* Qué hace: Adapta los contenedores de auditoría a fondo blanco puro con sombras y bordes discretos. */
-/* Por qué existe: Unifica el estilo visual de los paneles con las nuevas tarjetas de métricas. */
-/* Qué problema resuelve: Evita la discordancia de colores provocada por el color de fondo pálido previo. */
+/* Qué hace: Configura el contenedor principal de la bitácora de auditorías con bordes redondeados finos y sombras. */
+/* Por qué existe: Integra los logs de auditoría en la nueva línea de diseño del panel consolidado. */
+/* Qué problema resuelve: Quita el fondo gris opaco anterior sustituyéndolo por un estilo pulcro. */
 .dashboard-content .dashboard-audit-container {
     background-color: #ffffff !important;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 16px;
     padding: 24px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     width: 100%;
     box-sizing: border-box;
 }
 
-/* Qué hace: Estiliza el título del historial con línea separadora y tipografía en mayúsculas color slate. */
-/* Por qué existe: Marca una clara frontera jerárquica entre el título del panel y el scroll de auditoría. */
-/* Qué problema resuelve: Mejora el orden visual y la legibilidad de la cabecera de las bitácoras. */
+/* Qué hace: Da formato al título del panel de historial con tipografía Roboto pesada e indicador visual inferior. */
+/* Por qué existe: Establece el límite temático del panel de logs de cambios de forma clara. */
+/* Qué problema resuelve: Corrige la falta de definición y jerarquía del encabezado del historial. */
 .dashboard-content .ventanaHistorial__titulo {
     font-family: var(--fuente-titulos);
     font-size: 0.95rem;
-    font-weight: 700;
+    font-weight: 800;
     color: #1e293b;
     border-bottom: 2px solid #f1f5f9;
     padding-bottom: 12px;
     margin-bottom: 16px;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.05em;
     background-color: transparent !important;
 }
 
-/* Qué hace: Ajusta la altura del scroll y agrega padding para dar aire a los registros de auditoría. */
-/* Por qué existe: Asegura que el contenido quepa en pantalla de manera compacta sin desbordar el layout. */
-/* Qué problema resuelve: Previene roturas visuales por exceso de ítems en el historial de auditoría. */
+/* Qué hace: Restringe el alto a 280px y habilita el scroll vertical con padding lateral. */
+/* Por qué existe: Evita que un gran número de auditorías rompa la estructura vertical del panel. */
+/* Qué problema resuelve: Limita los logs de forma elegante permitiendo su visualización interna. */
 .dashboard-content .dashboard-audit-scroll {
     max-height: 280px;
     overflow-y: auto;
@@ -526,121 +666,249 @@
     height: auto !important;
 }
 
-/* Qué hace: Define la anchura fina y bordes redondeados para la barra de desplazamiento del scroll de auditorías. */
-/* Por qué existe: Personaliza la barra del sistema operativo para adaptarla al estilo premium y sutil de la app. */
-/* Qué problema resuelve: Elimina la barra de desplazamiento tosca y ancha del navegador por defecto. */
+/* Qué hace: Personaliza el ancho del scrollbar a 6px con thumb redondeada. */
+/* Por qué existe: Asegura que la barra de desplazamiento se integre con sutileza en el panel de auditoría. */
+/* Qué problema resuelve: Reemplaza las barras gruesas oscuras por defecto del navegador. */
 .dashboard-content .dashboard-audit-scroll::-webkit-scrollbar {
     width: 6px;
 }
 .dashboard-content .dashboard-audit-scroll::-webkit-scrollbar-track {
-    background: #f1f5f9;
+    background: #f8fafc;
     border-radius: 10px;
 }
 .dashboard-content .dashboard-audit-scroll::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
+    background: #e2e8f0;
     border-radius: 10px;
 }
 .dashboard-content .dashboard-audit-scroll::-webkit-scrollbar-thumb:hover {
-    background: #94a3b8;
+    background: #cbd5e1;
 }
 
 /* -------------------------------------------------------------
    ESTILOS DE CADA ITEM INDIVIDUAL DENTRO DEL HISTORIAL
    ------------------------------------------------------------- */
-/* Qué hace: Envuelve cada registro del historial en un bloque gris slate claro con bordes suaves y margen inferior. */
-/* Por qué existe: Separa de manera física y elegante cada log de auditoría facilitando su escaneo rápido. */
-/* Qué problema resuelve: Corrige la visualización confusa anterior que separaba los logs únicamente con una línea <hr>. */
+/* Qué hace: Envuelve cada registro de auditoría en un contenedor tipo tarjeta con fondo y bordes suaves. */
+/* Por qué existe: Separa visualmente cada acción del historial para facilitar una lectura independiente. */
+/* Qué problema resuelve: Agrupa la información relacionada en bloques discretos e incrementa el contraste. */
 .dashboard-content .ventanaHistorial__item {
-    padding: 12px;
+    padding: 14px 16px;
     background-color: #f8fafc;
-    border-radius: 8px;
+    border-radius: 12px;
     border: 1px solid #f1f5f9;
     margin-bottom: 12px;
-    transition: background-color 0.2s ease;
+    transition: all 0.2s ease;
 }
 
-/* Qué hace: Cambia sutilmente el color de fondo del log de auditoría al posar el ratón. */
-/* Por qué existe: Permite al usuario enfocar de manera interactiva la mirada en un log específico. */
-/* Qué problema resuelve: Resuelve la pasividad del listado estático de la bitácora. */
+/* Qué hace: Aplica un color de fondo y borde más destacado en hover. */
+/* Por qué existe: Brinda retroalimentación visual al usuario indicando el foco actual de lectura. */
+/* Qué problema resuelve: Aumenta la interactividad del panel de auditoría. */
 .dashboard-content .ventanaHistorial__item:hover {
     background-color: #f1f5f9;
+    border-color: #e2e8f0;
 }
 
-/* Qué hace: Ajusta la tipografía de cada campo descriptivo dentro del log con tamaño 0.85rem. */
-/* Por qué existe: Distribuye la información del log con un tamaño de fuente idóneo y espaciado óptimo. */
-/* Qué problema resuelve: Evita el colapso visual del texto y la saturación de espacio. */
-.dashboard-content .ventanaHistorial__item p {
-    margin: 4px 0;
+/* Qué hace: Define la estructura flex horizontal para la cabecera del registro de log. */
+/* Por qué existe: Alinea el tag de operación, el nombre del recurso, el usuario y el rol en una sola línea. */
+/* Qué problema resuelve: Corrige la dispersión vertical de datos del historial previo. */
+.dashboard-content .ventanaHistorial__fila-principal {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 0.825rem;
     color: #475569;
-    font-size: 0.85rem;
-    line-height: 1.4;
 }
 
-/* Qué hace: Pone en negrita oscura la etiqueta de cada atributo del log (Nombre, Acción, Usuario, etc). */
-/* Por qué existe: Permite diferenciar de forma inmediata la clave descriptiva del valor del dato. */
-/* Qué problema resuelve: Evita la monotonía del texto plano y agiliza la lectura del log. */
-.dashboard-content .ventanaHistorial__item strong {
-    color: #1e293b;
+/* Qué hace: Estiliza el nombre del catálogo o tabla afectada en negrita y color oscuro. */
+/* Por qué existe: Destaca la entidad del sistema sobre la cual se operó como el dato crítico primario. */
+/* Qué problema resuelve: Facilita el escaneo rápido de los logs para encontrar tablas específicas. */
+.dashboard-content .ventanaHistorial__modelo {
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* Qué hace: Configura un punto medio de color grisáceo como separador horizontal. */
+/* Por qué existe: Segmenta los bloques de texto continuo de forma discreta sin recargar la interfaz. */
+/* Qué problema resuelve: Reemplaza las barras crudas o comas aportando mayor limpieza visual. */
+.dashboard-content .ventanaHistorial__separador {
+    color: #cbd5e1;
+    margin: 0 2px;
+    font-weight: bold;
+}
+
+/* Qué hace: Define el peso seminegrita para el nombre del gestor que hizo el cambio. */
+/* Por qué existe: Otorga legibilidad a la identidad del autor de la operación. */
+/* Qué problema resuelve: Permite rastrear rápidamente quién alteró un registro. */
+.dashboard-content .ventanaHistorial__usuario {
     font-weight: 600;
+    color: #334155;
 }
 
-/* Qué hace: Oculta la etiqueta horizontal <hr> nativa dentro del log. */
-/* Por qué existe: Reemplaza las líneas crudas por el diseño de bloques encapsulados. */
-/* Qué problema resuelve: Elimina la superposición visual de líneas hr obsoletas. */
-.dashboard-content .ventanaHistorial__item hr {
-    display: none;
+/* Qué hace: Estiliza la etiqueta del rol del usuario con fondo gris slate y texto reducido. */
+/* Por qué existe: Indica de manera sutil el nivel de autorización del gestor. */
+/* Qué problema resuelve: Muestra el rol de forma legible sin competir con el nombre del usuario. */
+.dashboard-content .ventanaHistorial__rol {
+    color: #64748b;
+    font-size: 0.7rem;
+    background-color: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Qué hace: Define la estructura flex horizontal para la fila descriptiva del cambio. */
+/* Por qué existe: Expone la marca de tiempo y el nuevo valor asignado de manera paralela. */
+/* Qué problema resuelve: Ordena horizontalmente la metadata complementaria de la auditoría. */
+.dashboard-content .ventanaHistorial__fila-secundaria {
+    font-size: 0.775rem;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Qué hace: Da peso mediano al indicador de fecha y hora del evento. */
+/* Por qué existe: Resalta el momento temporal de la mutación. */
+/* Qué problema resuelve: Simplifica la lectura temporal. */
+.dashboard-content .ventanaHistorial__fecha {
+    font-weight: 500;
+}
+
+/* Qué hace: Define la tipografía y tono gris medio para la descripción del valor nuevo o anterior. */
+/* Por qué existe: Despliega la descripción textual del cambio registrado en la auditoría. */
+/* Qué problema resuelve: Diferencia la data descriptiva del resto de indicadores rígidos. */
+.dashboard-content .ventanaHistorial__cambio {
+    color: #475569;
+    font-weight: 500;
+}
+
+/* Qué hace: Define un tag tipo píldora compacta para mostrar el tipo de acción realizada (INSERT/UPDATE/DELETE). */
+/* Por qué existe: Muestra gráficamente la operación efectuada en la BD mediante una pastilla semántica. */
+/* Qué problema resuelve: Reemplaza palabras de texto crudo por indicadores semánticos coloreados y limpios. */
+.dashboard-content .badge-audit {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid transparent;
+}
+
+/* Qué hace: Asigna fondo verde y letras verdes para operaciones de creación (INSERT). */
+/* Por qué existe: Indica el alta o adición exitosa de un recurso en el catálogo. */
+/* Qué problema resuelve: Aporta color semántico de éxito. */
+.dashboard-content .badge-audit--insert {
+    background-color: #ecfdf5;
+    color: #059669;
+    border-color: #a7f3d0;
+}
+
+/* Qué hace: Asigna fondo naranja y letras naranjas para operaciones de edición (UPDATE). */
+/* Por qué existe: Indica la modificación o cambio de estado de un recurso existente. */
+/* Qué problema resuelve: Aporta color semántico de advertencia/cambio. */
+.dashboard-content .badge-audit--update {
+    background-color: #fff7ed;
+    color: #ea580c;
+    border-color: #ffedd5;
+}
+
+/* Qué hace: Asigna fondo rojo y letras rojas para operaciones de borrado físico (DELETE). */
+/* Por qué existe: Advierte sobre la eliminación definitiva de un elemento en el censo. */
+/* Qué problema resuelve: Aporta color de peligro. */
+.dashboard-content .badge-audit--delete {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+/* Qué hace: Asigna color gris neutral para operaciones indeterminadas. */
+/* Por qué existe: Fallback visual para acciones sin clasificar. */
+/* Qué problema resuelve: Mantiene la consistencia. */
+.dashboard-content .badge-audit--default {
+    background-color: #f1f5f9;
+    color: #475569;
+    border-color: #e2e8f0;
 }
 
 /* -------------------------------------------------------------
    SOBREESCRITURA Y EMBELLECIMIENTO DE LAS TABLAS DE DATOS
    ------------------------------------------------------------- */
-/* Qué hace: Ajusta la tabla a un borde gris slate claro con bordes redondeados y fondo blanco. */
-/* Por qué existe: Alinea el contenedor de la lista de últimos planes con el estilo unificado. */
-/* Qué problema resuelve: Evita discrepancias estéticas de color y sombra con respecto a las tarjetas. */
+/* Qué hace: Modifica la tabla principal de supervisor para aplicar bordes finos, sombra y fondo blanco. */
+/* Por qué existe: Adapta las tablas de datos a la línea estética limpia e interactiva del dashboard. */
+/* Qué problema resuelve: Corrige discrepancias de color y sombras con el resto de contenedores. */
 .dashboard-content .tabla--supervisor {
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
     background-color: #ffffff;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 16px;
+    overflow: hidden;
 }
 
-/* Qué hace: Asigna fondo gris claro a las celdas del encabezado de la tabla de planes. */
-/* Por qué existe: Clarifica visualmente dónde inician las columnas de datos principales. */
-/* Qué problema resuelve: Evita la confusión visual en la cabecera de la tabla. */
+/* Qué hace: Estiliza la cabecera de la tabla con fondo slate ultra-suave y un borde inferior. */
+/* Por qué existe: Diferencia claramente las etiquetas de las columnas del listado de planes. */
+/* Qué problema resuelve: Elimina la confusión visual en la cabecera de la tabla. */
 .dashboard-content .tabla__header {
     background-color: #f8fafc;
+    border-bottom: 2px solid #f1f5f9;
 }
 
-/* Qué hace: Ajusta las celdas a bordes inferiores claros y tamaño de fuente optimizado. */
-/* Por qué existe: Limpia el espaciado interior brindando mayor legibilidad a la data tabular. */
-/* Qué problema resuelve: Suprime las líneas gruesas oscuras de la tabla previa. */
+/* Qué hace: Ajusta las celdas de la tabla con bordes de fila tenues y padding amplio de 16px. */
+/* Por qué existe: Genera una visualización limpia, espaciosa y descansada de la información tabular. */
+/* Qué problema resuelve: Quita el amontonamiento de texto y las celdas muy juntas. */
 .dashboard-content .tabla__celda {
     border-bottom: 1px solid #f1f5f9;
+    padding: 16px 20px;
     font-size: 0.9rem;
     color: #475569;
 }
 
-/* Qué hace: Cambia la fuente del encabezado de la tabla a un tono más slate con peso seminegrita. */
-/* Por qué existe: Aumenta la elegancia tipográfica de la cabecera de la tabla de datos. */
-/* Qué problema resuelve: Unifica las etiquetas de la tabla con los títulos del dashboard. */
+/* Qué hace: Estiliza las celdas del título con peso bold y tipografía en mayúsculas slate. */
+/* Por qué existe: Destaca las cabeceras jerárquicas con el formato adecuado. */
+/* Qué problema resuelve: Unifica las fuentes de la tabla con los títulos de la interfaz. */
 .dashboard-content .tabla__celda--titulo {
     color: #64748b;
-    font-weight: 600;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
 }
 
-/* Qué hace: Agrega un efecto hover que resalta la fila de la tabla en gris claro. */
-/* Por qué existe: Facilita el escaneo visual horizontal de una misma fila por parte del usuario. */
-/* Qué problema resuelve: Evita la fatiga visual al recorrer registros en tablas anchas. */
+/* Qué hace: Añade un hover que resalta suavemente la fila entera de la tabla en un azul slate muy tenue. */
+/* Por qué existe: Facilita el escaneo horizontal rápido de la fila por parte del supervisor. */
+/* Qué problema resuelve: Evita perder la línea de lectura al revisar múltiples columnas. */
+.dashboard-content .tabla__fila {
+    transition: background-color 0.2s ease;
+}
 .dashboard-content .tabla__fila:hover .tabla__celda {
-    background-color: #f8fafc;
+    background-color: #f0f7ff;
 }
 
-/* Qué hace: Modifica el icono de la tabla a un color azul marca con fondo azul claro translúcido. */
-/* Por qué existe: Mantiene la consistencia de diseño de iconos circulares con fondo claro del panel. */
-/* Qué problema resuelve: Elimina la saturación del icono original del listado. */
+/* Qué hace: Modifica el icono redondo de familia en la tabla con transiciones suaves. */
+/* Por qué existe: Provee un fondo circular azul suave para alojar el icono con retroalimentación en hover. */
+/* Qué problema resuelve: Otorga un diseño moderno que reemplaza iconos toscos o planos. */
 .dashboard-content .tabla__icono {
     background-color: #eff6ff;
     color: #2563eb;
-    margin-right: 10px;
+    margin-right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    vertical-align: middle;
+    transition: transform 0.2s ease-in-out;
+}
+.dashboard-content .tabla__fila:hover .tabla__icono {
+    transform: scale(1.1);
 }
 
 /* -------------------------------------------------------------
@@ -955,6 +1223,92 @@
     font-size: 0.85rem;
     color: #475569;
     border-radius: 0 8px 8px 0;
+}
+
+
+/* ==========================================================================
+   ESTILOS PREMIUM ADICIONALES (AUDITORÍA UI/UX Y OPTIMIZACIÓN RESPONSIVA)
+   ========================================================================== */
+
+/* -------------------------------------------------------------
+   VISIBILIDAD RESPONSIVA DE ELEMENTOS (TABLAS Y LISTAS DE TARJETAS)
+   ------------------------------------------------------------- */
+/* Qué hace: Controla cuándo se muestra la tabla detallada (desktop) y cuándo la lista compacta (móvil). */
+/* Por qué existe: Evita la duplicación de datos en pantalla y adecúa el layout a la resolución del dispositivo. */
+/* Qué problema resuelve: Corrige la visualización rota donde ambos formatos se encimaban en cualquier tamaño de pantalla. */
+@media screen and (min-width: 769px) {
+    #listaPlanesMovil {
+        display: none !important;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    #tablaPlanesDesktop {
+        display: none !important;
+    }
+}
+
+/* -------------------------------------------------------------
+   BARRA DE NAVEGACIÓN INFERIOR PARA DISPOSITIVOS MÓVILES (UX MOBILE FIRST)
+   ------------------------------------------------------------- */
+/* Qué hace: Rediseña el sidebar vertical a una barra horizontal fija en el borde inferior. */
+/* Por qué existe: Optimiza la ergonomía en móviles, facilitando clics con una sola mano y liberando área visual. */
+/* Qué problema resuelve: Elimina la superposición del sidebar de 95px sobre el lado izquierdo del contenido móvil. */
+@media screen and (max-width: 768px) {
+    .sidebar--dashboard {
+        position: fixed !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        top: auto !important;
+        width: 100% !important;
+        height: 60px !important;
+        flex-direction: row !important;
+        justify-content: space-around !important;
+        border-top: 1px solid #e2e8f0 !important;
+        border-right: none !important;
+        box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.05) !important;
+        padding: 0 10px !important;
+        background-color: #ffffff !important;
+        z-index: 1000 !important;
+    }
+
+    .sidebar--dashboard .sidebar__lista {
+        display: flex !important;
+        flex-direction: row !important;
+        width: 100% !important;
+        height: 100% !important;
+        justify-content: space-around !important;
+        align-items: center !important;
+        gap: 0 !important;
+    }
+
+    .sidebar--dashboard .sidebar__link {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 5px !important;
+        flex: 1 !important;
+        height: 100% !important;
+        grid-template-columns: none !important;
+    }
+
+    .sidebar--dashboard .sidebar__link .icono__grande {
+        font-size: 20px !important;
+    }
+
+    .sidebar--dashboard .siderbar__oculto {
+        display: none !important; /* Oculta los textos en móvil para mostrar solo iconos limpios */
+    }
+
+    /* Modificaciones al contenedor de contenido del panel para pantallas móviles */
+    .dashboard-content {
+        margin-left: 0 !important;
+        margin-bottom: 70px !important; /* Deja espacio para que la barra inferior no tape los datos al final de la página */
+        width: 100% !important;
+        padding: 15px !important;
+    }
 }
 
 
