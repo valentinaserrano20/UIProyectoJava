@@ -64,7 +64,6 @@ export default async () => {
   // Definir si existen miembros de la familia para realizar acciones en el menu -------------------------------------------------------------------------------...
   const tieneMiembros = await api.get(`familyPlans/has-members/${id}`);
   const hasMembers = tieneMiembros ? tieneMiembros.has_members : false;
-  console.log("Tiene integrantes:", hasMembers);
   
 
   // Router Volver al Muro General
@@ -102,7 +101,6 @@ export default async () => {
   factoresRiesgo.addEventListener("click", async () => {
     
     if(!hasMembers){
-      // console.log("No tiene miembros");
       alerta.alertaWarning(`El Plan de la Familia ${planFamiliar.last_names} no posee ningun integrante`);
       return;
     }

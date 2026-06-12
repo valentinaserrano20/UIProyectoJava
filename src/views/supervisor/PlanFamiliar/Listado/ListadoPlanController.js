@@ -92,7 +92,6 @@ const ListadoPlanController = async () => {
 
         const div = document.createElement("div");
         div.classList.add("tarjeta");
-        console.log(info);
 
 
         //INTRODUCCION DE LA TARJETA _____________________________________________________________________________________

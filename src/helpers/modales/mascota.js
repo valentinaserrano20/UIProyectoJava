@@ -113,7 +113,6 @@
           alerta.alertaWarning(data.message, data.errors);
         }
       } catch (error) {
-        console.log(error);
         alerta.alertaError(error.errors);
       }
     };
@@ -183,7 +182,6 @@
             await recargarContainer();
           } else alerta.alertaWarning(data.message, data.errors);
         } catch (error) {
-          console.log(error);
           alerta.alertaError(error.errors);
         }
       };

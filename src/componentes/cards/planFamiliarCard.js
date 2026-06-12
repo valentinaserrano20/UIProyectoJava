@@ -37,8 +37,7 @@ export const cardPlanFamiliar = (planFamiliar) => {
 
   const tipoClase = planFamiliar.family_type_id == 1 ? "verPlan__tipo--rojo" : planFamiliar.family_type_id == 2 ? "verPlan__tipo--verde" : "verPlan__tipo--gris";
   // Override Label Texto para Rechazos (El backend tal vez manda textos largos, front los recorta)
-    
-    // console.log("EStados:", planFamiliar.status);
+
     
   // Maquetación DOM de la Carta
     div.innerHTML = `

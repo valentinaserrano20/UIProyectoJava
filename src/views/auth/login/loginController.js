@@ -15,8 +15,6 @@ export default async () => {
   const correo = document.getElementById("correo"); // Caja input email
   const contrasena = document.getElementById("contrasena"); // Caja input pass
   const botonLogin = document.getElementById("botonLogin"); // Actioner
-
-  console.log(botonLogin)
   // Validadores y pre-flags para evitar la concurrencia de clicks (Race condition bug fix)
   if (window.procesoPeticion === undefined) {
     window.procesoPeticion = false;

@@ -216,7 +216,6 @@ export default async () => {
       // localStorage.setItem(`puntaje-${e.target.name}`, e.target.value); // Crea token interno llamado Puntaje para rastreo
 
       testRespuestas.puntaje[`puntaje-${e.target.name}`] = true;
-      console.log(`puntaje-${e.target.name}, ${e.target.value}`);
     }
 
     // Por ende Restador Definitivo: Si antes pulsó que SÍ, pero ahora recapacitó por un trágico NO... Destruimos el puntaje y se lo restamos al global
@@ -224,11 +223,9 @@ export default async () => {
       // localStorage.removeItem(`puntaje-${e.target.name}`);
 
       delete testRespuestas.puntaje[`puntaje-${e.target.name}`];
-      console.log(`puntaje-${e.target.name}, ${e.target.value}`);
     }
 
     testRespuestas.contador = Object.keys(testRespuestas.puntaje).length; // El contador toma datos numericos del puntaje con .length, el puntaje solo tomara los datos existentes "= true", ya que los datos "= false" son eliminados
-    console.log(`Respuesta SI: ${testRespuestas.contador}`); // visualizar en consola cuantas respuestas "SI" fueron marcadas
   });
 
   /**

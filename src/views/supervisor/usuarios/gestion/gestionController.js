@@ -85,8 +85,6 @@ export default async () => {
         // Recuperar Meta-ID guardado en tiempo de inyección (data-id)
         const userId = tarjetaClickeada.dataset.id;
 
-        console.log("USER ID", userId);
-
         // Lanza función "Ver" contenida en "modales/usuario.js" pasando 
         // la ID identificadora, el refresco padre y el modo de usuario supervisor.
         // Habilitamos la bandera esAdmin (cuarto parámetro en true) para dar permisos de gestión completos.

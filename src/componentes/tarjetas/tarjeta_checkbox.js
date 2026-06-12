@@ -4,7 +4,6 @@ import * as api from "../../helpers/api";
 export const tarjetaPeticion = async (info) => {
     const users = await api.get("users/requests/supervisors");
 
-    console.log(users);
 
     // Contenedor principal de la tarjeta
     const tarjeta = document.createElement('div');

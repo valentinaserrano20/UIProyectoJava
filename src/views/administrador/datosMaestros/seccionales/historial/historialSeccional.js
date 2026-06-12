@@ -6,10 +6,7 @@ const historialSeccional = async () => {
     const id = location.hash.split("=")[1];
 
     const datoMaestro = await api.get(`sectionals/${id}`);
-    console.log(id + ". " + datoMaestro.name);
-
     const datosHistorial = await api.get(`sectionals/${id}/history/`);
-    console.log(datosHistorial);
 
 
     historial(datosHistorial, datoMaestro, null, "name", null);

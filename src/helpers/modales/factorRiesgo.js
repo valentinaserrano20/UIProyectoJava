@@ -152,7 +152,6 @@ export const crearAccion = async (riskFactorId, familyPlanId, recargarContainer)
             }
 
         } catch (error) {
-            console.log(error);
             alerta.alertaError(error.errors);
         }
 
@@ -259,7 +258,6 @@ export const verEditarEliminarAccion = async (id, familyPlanId, recargarContaine
                 }
 
             } catch (error) {
-                console.log(error);
                 alerta.alertaError(error.errors);
             }
 
@@ -353,7 +351,6 @@ export const crearVulnerabilidad = async (riskFactorId, recargarContainer) => {
             }
 
         } catch (error) {
-            console.log(error);
             alerta.alertaError(error.errors);
         }
     };
@@ -451,7 +448,6 @@ export const verEditarEliminarVulnerabilidad = async (id, recargarContainer, esS
                 }
 
             } catch (error) {
-                console.log(error);
                 alerta.alertaError(error.errors);
             }
         };

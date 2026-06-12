@@ -28,7 +28,6 @@ export default async () => {
     const recargar = async () => {
 
         const datos = await api.get("vulnerableQuestions/");
-        console.log(datos);
         
 
         const contenedor = document.querySelector(".listaDatos");

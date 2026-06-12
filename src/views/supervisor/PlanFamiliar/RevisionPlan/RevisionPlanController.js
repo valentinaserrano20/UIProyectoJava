@@ -16,9 +16,6 @@ const RevisionPlanController = async () => {
 
     const info = await api.get(`familyPlans/${id}`);
 
-    // console.log(info);
-    
-
     const familyMembers = await api.get(`integrantes/`);
 
     const sectors = await api.get(`sectores/`);
@@ -159,8 +156,6 @@ const RevisionPlanController = async () => {
 
         const miembro = await api.get(`members/${integrante.member_id}`);
 
-        console.log("miembro", miembro);
-
         const relacion = await api.get(`kinships/${miembro.kinship_id}`);
 
         const integranteCont = document.createElement("div");
@@ -293,16 +288,11 @@ const RevisionPlanController = async () => {
 
     recursosCont.append(subtituloRecursos);
 
-
-    console.log("recursos", Resources);
-
     let contadorRecursos = 0;
 
     for (const recurso of Resources) {
 
         contadorRecursos++;
-
-        console.log("recurso", recurso);
 
         const recursoCont = document.createElement("div");
         recursoCont.classList.add("form_autorizacion");

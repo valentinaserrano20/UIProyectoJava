@@ -28,10 +28,8 @@ export default async () => {
     const recargar = async () => {
         
         const datosOrganizacion = await api.get("organizations/");
-        //console.log(datosOrganizacion);
         
         const datosSectional = await api.get("sectionals/");
-        //console.log(datosSectional);
         
         
         const contenedor = document.querySelector(".listaDatos");

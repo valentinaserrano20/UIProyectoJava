@@ -431,7 +431,6 @@ const validarRol = async (hash) => {
  */
 const cargarVista = async (path, elemento) => {
 
-    console.log(path, elemento);
 
     const seccion = await fetch(`./src/views/${path}`);
 

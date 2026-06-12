@@ -27,7 +27,6 @@ export default async () => {
     const recargar = async () => {
 
         const datosDocumentos = await api.get("resources/");
-        console.log(datosDocumentos);
         
         const contenedor = document.querySelector(".listaDatos");
         contenedor.innerHTML = "";

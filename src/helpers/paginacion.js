@@ -21,7 +21,6 @@ const paginacion = async (peticion, mensajeVacio, carta) => {
     // 1. Averigua el tamaño de la metadata preguntando al endpoint
     const paginas = await api.getPaginacion(peticion);
     const cantidad = paginas.paginate.last_page; // Total de hojas/páginas
-    console.log(paginas)
 
     // 2. Comprueba si hay al menos 1 registro
     const evaluacion = await evaluarDatos();

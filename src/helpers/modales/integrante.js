@@ -195,7 +195,6 @@ export const afeccionCrear = async (id, recargarContainer) => {
           return false
         }
       } catch (error) {
-        console.log(error);
         alerta.alertaError(error.errors);
         return false
       }
@@ -339,8 +338,6 @@ export const verEditarEliminar = async (id, integranteId, recargarContainer, esS
           }
 
         } catch (error) {
-
-          console.log(error);
           alerta.alertaError(error.errors);
           return false;
 

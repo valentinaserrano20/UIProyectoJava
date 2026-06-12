@@ -89,7 +89,6 @@ const MascotaVentana = async (mascota, info) => {
     generoCont.append(generoTitulo, genero);
 
     const petsVaccines = await api.get(`petVaccines/pet/${mascota.id}`);
-    console.log("vacunas: ", petsVaccines);
 
     const vacunasCont = document.createElement("div");
     vacunasCont.classList.add("form_autorizacion", "form-column_autorization");
